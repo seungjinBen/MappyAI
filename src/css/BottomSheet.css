@@ -1,0 +1,77 @@
+.sheetMain {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  background-color: white;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
+  height: var(--visible-height);
+  max-height: 90vh;
+  transition: height 0.1s linear;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  touch-action: none;
+}
+
+.sheetHeader {
+  flex-shrink: 0;
+  padding: 10px 16px;
+  background-color: #fff;
+  border-bottom: 1px solid #eee;
+  cursor: grab;
+}
+
+.sheetHeader:active {
+  cursor: grabbing;
+}
+
+.sheetGrabber {
+  width: 40px;
+  height: 5px;
+  background-color: #e0e0e0;
+  border-radius: 3px;
+  margin: 0 auto 10px auto;
+}
+
+.sheetHeaderRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sheetTitle {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+}
+
+.sheetClose {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sheetCloseIcon {
+  width: 24px;
+  height: 24px;
+  fill: #666;
+}
+
+.sheetContent {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  background-color: #f9f9f9;
+}
+
+.sheetMask {
+  /* 필요 시 구현: 배경 딤 처리 등 */
+}

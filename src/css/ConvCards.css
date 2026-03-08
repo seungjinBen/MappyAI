@@ -1,0 +1,172 @@
+/* 컨테이너 */
+.convcards {
+  display: grid;
+  gap: 20px;
+  padding-bottom: 20px;
+}
+
+.empty {
+  text-align: center;
+  color: #9CA3AF;
+  font-size: 0.95rem;
+  padding: 40px 0;
+}
+
+/* 카드 */
+.card {
+  background: #fff;
+  border: 1px solid #f1f5f9;
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f8fafc;
+}
+.card__title {
+  color: #1e293b;
+  font-weight: 700;
+  font-size: 1rem;
+  margin-left: 8px;
+  margin-right: auto;
+}
+
+/* 채팅 레이아웃 */
+.chat {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.row--me { justify-content: flex-end; }
+.row--other { justify-content: flex-start; }
+
+/* 아바타 */
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: #f1f5f9;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 0.75rem;
+  color: #64748b;
+  flex: 0 0 32px;
+}
+
+.avatar--me {
+  background: #ECFDF5;
+  color: #166534;
+}
+
+/* 말풍선 공통 */
+.bubble {
+  max-width: 80%;
+  padding: 12px 14px;
+  border-radius: 16px;
+  line-height: 1.5;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  position: relative;
+}
+
+/* 말풍선 (나 - 연두색) */
+.bubble--me {
+  background: #ECFDF5;
+  color: #14532d;
+  border-bottom-right-radius: 4px;
+}
+
+/* 말풍선 (상대방) */
+.bubble--other {
+  background: #f8fafc;
+  color: #1e293b;
+  border-bottom-left-radius: 4px;
+}
+
+/* 텍스트 스타일 */
+.bubble-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.en {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.ko {
+  font-size: 0.85rem;
+  opacity: 0.8;
+  margin: 4px 0 0 0;
+}
+
+/* 오디오 버튼 */
+.audio-btn {
+  background: rgba(255, 255, 255, 0.5); /* 버튼 배경을 살짝 밝게 */
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+/* 내 말풍선 안의 오디오 버튼 */
+.bubble--me .audio-btn {
+  color: #166534;
+}
+
+/* 상대 말풍선 안의 오디오 버튼 */
+.bubble--other .audio-btn {
+  color: #64748b;
+}
+
+.audio-btn:hover {
+  transform: scale(1.1);
+  background: rgba(255, 255, 255, 0.8);
+}
+
+/* 반응형 */
+@media (max-width: 480px) {
+  .bubble { max-width: 85%; }
+  .en { font-size: 0.95rem; }
+  .card { padding: 12px; }
+}
+
+.audio-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+
+.audio-btn:hover {
+  transform: scale(1.1);
+  background: none;
+}

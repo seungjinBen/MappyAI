@@ -1,0 +1,104 @@
+/* 전체 화면을 덮는 어두운 배경 */
+.sheet-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000; /* 최상단 */
+  display: flex;
+  align-items: flex-end; /* 바닥에 붙이기 */
+  justify-content: center;
+  animation: fade-in 0.3s ease-out;
+}
+
+/* 실제 하얀색 시트 */
+.sheet-container {
+  width: 100%;
+  height: 91vh; /* 화면의 90% 높이까지 올라옴 */
+  background-color: #F9FAFB;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+  animation: slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1); /* 부드러운 텐션 */
+  overflow: hidden;
+}
+
+/* 헤더*/
+.sheet-header {
+  padding: 16px 20px;
+  background-color: #fff;
+  border-bottom: 1px solid #E5E7EB;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0; /* 스크롤 시 줄어들지 않음 */
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sheet-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.save-count {
+  background-color: #EFF6FF;
+  color: #3B82F6;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+}
+
+/* 콘텐츠 */
+.sheet-content {
+  flex: 1;
+  overflow-y: auto; /* 내부 스크롤 */
+  padding: 20px;
+  padding-bottom: 70px; /* 하단 여백 */
+}
+
+/* === 기존 카드 스타일 재사용 (MyCard.css 내용 포함) === */
+.card-grid { display: flex; flex-direction: column; gap: 16px; }
+.conversation-card { background: #fff; border-radius: 16px; border: 1px solid #F3F4F6; display: flex; overflow: hidden; }
+.color-bar { width: 6px; flex-shrink: 0; }
+.card-content { flex: 1; padding: 16px; }
+.card-top-row { display: flex; justify-content: space-between; margin-bottom: 12px; }
+.place-tag { display: flex; gap: 6px; align-items: center; font-size: 13px; font-weight: 600; padding: 4px 8px; border-radius: 6px; }
+.delete-btn { background: none; border: none; cursor: pointer; padding: 4px; }
+.dialogue-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #D1D5DB; }
+.dialogue-row:last-child { border-bottom: none; }
+.english-text { font-size: 15px; font-weight: 500; color: #111827; margin: 0 0 4px 0; }
+.korean-text { font-size: 12px; color: #9CA3AF; margin: 0; }
+.speak-btn-mini { background: none; border: none; cursor: pointer; }
+
+/* 애니메이션 키프레임 */
+@keyframes slide-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.loading-state, .empty-state { text-align: center; color: #6B7280; padding-top: 50px; }

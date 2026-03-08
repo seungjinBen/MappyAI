@@ -1,0 +1,169 @@
+.login-page-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f0f2f5;
+    padding: 20px;
+    padding-bottom: 120px;
+    box-sizing: border-box;
+}
+
+/* 카드 디자인 */
+.login-card {
+    background-color: #ffffff;
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    width: 90%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* 텍스트 스타일 */
+.login-title {
+    margin: 0 0 10px 0;
+    color: #333;
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.login-subtitle {
+    margin: 0 0 30px 0;
+    color: #666;
+    text-align: center;
+    font-size: 14px;
+}
+
+/* 폼 스타일 */
+.login-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.input-group {
+    margin-bottom: 20px;
+}
+
+.input-label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #444;
+}
+
+.login-input {
+    width: 100%;
+    padding: 12px;
+    font-size: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.login-input:focus {
+    border-color: #4CAF50;
+}
+
+/* 버튼 스타일 */
+.login-btn {
+    width: 100%;
+    padding: 14px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.2s;
+}
+
+.login-btn:hover {
+    background-color: #45a049;
+}
+
+/* 구분선 */
+.divider {
+    display: flex;
+    align-items: center;
+    margin: 25px 0;
+    border-bottom: 1px solid #eee;
+    height: 1px;
+    position: relative;
+    justify-content: center;
+}
+
+.divider-text {
+    background-color: white;
+    padding: 0 10px;
+    color: #888;
+    font-size: 12px;
+    position: absolute;
+    top: -8px;
+}
+
+/* 회원가입 영역 */
+.register-container {
+    text-align: center;
+}
+
+.register-text {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 8px;
+    display: inline-block;
+    margin-right: 8px;
+}
+
+.register-link {
+    color: #4CAF50;
+    font-weight: bold;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.register-link:hover {
+    text-decoration: underline;
+}
+
+/* 이미 로그인된 상태 스타일 */
+.icon-wrapper {
+    font-size: 40px;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.info-text {
+    text-align: center;
+    color: #555;
+    margin-bottom: 20px;
+}
+
+.highlight-text {
+    color: #4CAF50;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.secondary-btn {
+    width: 100%;
+    padding: 12px;
+    background-color: #f1f3f5;
+    color: #333;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.secondary-btn:hover {
+    background-color: #e9ecef;
+}

@@ -1,0 +1,65 @@
+.card-container { padding: 16px 0; }
+.container.cq { container-type: inline-size; }
+.card-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+.card { border: 1px solid #e5e7eb; border-radius: 16px; padding: 12px; background: #fff; margin-bottom: 10px; }
+.shadow-soft { box-shadow: 0 8px 16px rgba(0,0,0,0.06); }
+.card-title { margin: 0 0 8px 0; font-weight: 550; font-size: 16px; }
+.card-img { width: 100%; height: auto; border-radius: 12px; display: block; margin-bottom: 12px; }
+.card-list { margin: 0; padding-left: 1em; }
+.chip-pill { border: 1px solid #e5e7eb; border-radius: 999px; padding: 4px 10px; font-size: 12px; background: #f9fafb; color: #374151; white-space: nowrap; }
+.meta-list { list-style: none; margin: 0; padding: 0; display: grid; row-gap: 6px; }
+.meta-list li { display: grid; grid-template-columns: 72px 1fr; column-gap: 8px; align-items: baseline; }
+.meta-key { color: #6b7280; font-size: 12px; }
+.meta-val { color: #111827; font-size: 14px; line-height: 1.4; word-break: break-word; }
+.btn-outline { display: inline-block; border: 1px solid #e5e7eb; border-radius: 8px; padding: 8px 12px; font-size: 14px; text-decoration: none; color: #111827; background: #fff; transition: box-shadow .15s ease, transform .05s ease; }
+.btn-outline:hover { box-shadow: 0 6px 12px rgba(0,0,0,.06); }
+.btn-outline:active { transform: translateY(1px); }
+
+.placecard { padding: 14px; border-radius: 16px; }
+.placecard__header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px;
+}
+.placecard__title { margin: 0; font-weight: 700; font-size: 18px; }
+.placecard__desc { margin: 8px 6px 12px 6px; line-height: 1.55; color: #374151; }
+.placecard__actions { display: flex; gap: 8px; margin-top: 8px; }
+
+.place-description-box {
+  background-color: #f8fafc;
+  border-radius: 12px;
+  padding: 16px;
+  margin: 0;
+  border: 1px solid #f1f5f9;
+}
+
+.place-description-text {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.75;
+  color: #334155;
+  word-break: keep-all;
+  letter-spacing: -0.3px;
+}
+
+/* 캐러셀을 카드 내부 기준으로 고정 */
+.placecard .media-carousel {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  width: 100%;
+  container-type: inline-size; /* 반응형 비율 전환용 */
+}
+
+/* 카드 컨테이너 너비에 따라 비율 변경 */
+@container (min-width: 520px) {
+  .placecard .media-slide { aspect-ratio: 16 / 10; }
+}
+@container (min-width: 800px) {
+  .placecard .media-slide { aspect-ratio: 21 / 9; }
+}
+
+/* 작은 화면에서 글이 너무 붙어 보이지 않게 */
+@media (max-width: 480px) {
+  .placecard__title { font-size: 16px; }
+  .placecard__desc { font-size: 14px; }
+}

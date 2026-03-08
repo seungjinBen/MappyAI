@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
+import { AuthProvider } from '@/context/AuthContext';
+import { DataProvider } from '@/context/DataContext';
+import MainLayout from '@/components/Layout/MainLayout';
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -27,8 +31,16 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <AuthProvider>
+          <DataProvider>
+            {/* MainLayout으로 감싸서 전역 바텀바와 시트 상태를 유지합니다. */}
+            <MainLayout>
+              {children}
+            </MainLayout>
+          </DataProvider>
+        </AuthProvider>
       </body>
     </html>
   );
 }
+
