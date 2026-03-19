@@ -1,104 +1,187 @@
-/* 전체 화면을 덮는 어두운 배경 */
-.sheet-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 1000; /* 최상단 */
-  display: flex;
-  align-items: flex-end; /* 바닥에 붙이기 */
-  justify-content: center;
-  animation: fade-in 0.3s ease-out;
-}
-
-/* 실제 하얀색 시트 */
-.sheet-container {
-  width: 100%;
-  height: 91vh; /* 화면의 90% 높이까지 올라옴 */
-  background-color: #F9FAFB;
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
-  animation: slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1); /* 부드러운 텐션 */
-  overflow: hidden;
-}
-
-/* 헤더*/
-.sheet-header {
-  padding: 16px 20px;
-  background-color: #fff;
-  border-bottom: 1px solid #E5E7EB;
+/* --- 퀘스트 상단 헤더 영역 --- */
+.quest-header-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-shrink: 0; /* 스크롤 시 줄어들지 않음 */
+  padding: 0 14px;
+  margin-top: 16px; 
 }
 
-.header-left {
+.quest-title-wrap {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
 }
 
-.sheet-title {
-  font-size: 20px;
-  font-weight: 700;
+.quest-header-icon-box {
+  background-color: #e8f5e9;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quest-main-title {
+  font-size: 22px;
+  font-weight: 800;
   color: #111827;
   margin: 0;
 }
 
-.save-count {
-  background-color: #EFF6FF;
-  color: #3B82F6;
-  font-size: 13px;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 12px;
-}
-
-.close-btn {
+/* 닫기 버튼 스타일 조정 */
+.sheetClose {
   background: none;
   border: none;
+  padding: 8px;
   cursor: pointer;
-  padding: 4px;
   display: flex;
   align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
 }
 
-/* 콘텐츠 */
-.sheet-content {
-  flex: 1;
-  overflow-y: auto; /* 내부 스크롤 */
+.sheetClose:active {
+  background-color: #f3f4f6;
+}
+
+.sheetCloseIcon {
+  width: 24px;
+  height: 24px;
+  fill: #9ca3af;
+}
+
+/* 회색 설명글 */
+.quest-header-desc {
+  font-size: 14px;
+  color: #6b7280;
+  padding: 10px 14px 20px 14px;
+  line-height: 1.5;
+  word-break: keep-all;
+}
+
+/* --- 퀘스트 카드 리스트 컨테이너 --- */
+.quest-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0 14px 0px 14px;
+}
+
+.quest-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+/* --- 개별 카드 --- */
+.quest-card {
+  display: flex;
+  align-items: center;
+  background-color: #ffffff;
+  border: 1px solid #f3f4f6;
+  border-radius: 24px;
   padding: 20px;
-  padding-bottom: 70px; /* 하단 여백 */
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.04);
 }
 
-/* === 기존 카드 스타일 재사용 (MyCard.css 내용 포함) === */
-.card-grid { display: flex; flex-direction: column; gap: 16px; }
-.conversation-card { background: #fff; border-radius: 16px; border: 1px solid #F3F4F6; display: flex; overflow: hidden; }
-.color-bar { width: 6px; flex-shrink: 0; }
-.card-content { flex: 1; padding: 16px; }
-.card-top-row { display: flex; justify-content: space-between; margin-bottom: 12px; }
-.place-tag { display: flex; gap: 6px; align-items: center; font-size: 13px; font-weight: 600; padding: 4px 8px; border-radius: 6px; }
-.delete-btn { background: none; border: none; cursor: pointer; padding: 4px; }
-.dialogue-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #D1D5DB; }
-.dialogue-row:last-child { border-bottom: none; }
-.english-text { font-size: 15px; font-weight: 500; color: #111827; margin: 0 0 4px 0; }
-.korean-text { font-size: 12px; color: #9CA3AF; margin: 0; }
-.speak-btn-mini { background: none; border: none; cursor: pointer; }
-
-/* 애니메이션 키프레임 */
-@keyframes slide-up {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
+/* --- 왼쪽 썸네일 --- */
+.quest-card-img-box {
+  width: 90px;
+  height: 90px;
+  border-radius: 16px;
+  overflow: hidden;
+  flex-shrink: 0;
 }
 
-@keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+.quest-card-img-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
-.loading-state, .empty-state { text-align: center; color: #6B7280; padding-top: 50px; }
+/* --- 중앙 텍스트 영역 --- */
+.quest-card-info {
+  flex: 1;
+  margin-left: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+}
+
+/* 초록색 배지 */
+.quest-badge {
+  display: inline-block;
+  background-color: #e8f5e9;
+  color: #10B981;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  width: fit-content;
+}
+
+/* 제목 영역 */
+.quest-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.quest-name {
+  font-size: 18px;
+  font-weight: 800;
+  color: #111827;
+  margin: 0;
+}
+
+.quest-subname {
+  font-size: 15px;
+  font-weight: 700;
+  color: #111827;
+}
+
+/* 스탬프 획득 텍스트 */
+.quest-stamp-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #9ca3af;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+/* --- 우측 화살표 --- */
+.quest-arrow {
+  flex-shrink: 0;
+  margin-left: 12px;
+}
+
+/* 잠긴 장소 카드 전용 스타일 */
+.quest-card.locked {
+  background-color: #fafafa;
+  border: 1px dashed #e5e7eb;
+  box-shadow: none;
+}
+
+.locked-box {
+  background-color: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.locked-text {
+  color: #9ca3af;
+  font-style: italic;
+}
+
+.locked-subtext {
+  color: #d1d5db;
+  font-weight: 500;
+}

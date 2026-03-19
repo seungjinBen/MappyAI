@@ -30,12 +30,12 @@ interface Conversation {
   isSaved?: boolean;
 }
 
-const TARGET_IDS = [55,56,58,59,61,62,63,64,70,71,75,76,78,79,81,82];
+const TARGET_IDS = [102,103,105,106,108,111,114,115,116,118];
 const GMAPS_LIBRARIES: ("places" | "geometry" | "drawing" | "visualization")[] = ['places'];
-const DEFAULT_CENTER = { lat: 51.5148, lng: -0.1090 };
-const DEFAULT_ZOOM = 13;
+const DEFAULT_CENTER = { lat: 55.9523, lng: -3.1952 };
+const DEFAULT_ZOOM = 14.5;
 
-export default function LondonPage() {
+export default function EdinPage() {
   const router = useRouter();
   const params = useParams();
   const id = params?.id as string | undefined;
@@ -64,7 +64,7 @@ export default function LondonPage() {
 
   const filteredPlaces = useMemo(() => {
     return placeList.filter(
-      (p) => p.cityId === 3 && TARGET_IDS.includes(Number(p.id))
+      (p) => p.cityId === 4 && TARGET_IDS.includes(Number(p.id))
     );
   }, [placeList]);
 
@@ -104,13 +104,13 @@ export default function LondonPage() {
     setSelectedPlace(p);
     panTo(p.lat, p.lng);
     // 최적화 2: Next.js 라우터 이동 시 스크롤 점프를 막고 부드럽게 넘김
-    router.push(`/london/${p.id}`, { scroll: false });
+    router.push(`/edinburgh/${p.id}`, { scroll: false });
     setOpen(true);
   }, [router, panTo]);
 
   const handleMapClick = useCallback(() => {
     setSelectedPlace(null);
-    router.push('/london', { scroll: false });
+    router.push('/edinburgh', { scroll: false });
     panTo(DEFAULT_CENTER.lat, DEFAULT_CENTER.lng, DEFAULT_ZOOM);
     setOpen(false);
   }, [router, panTo]);
@@ -151,7 +151,7 @@ export default function LondonPage() {
   }, [filteredPlaces, selectedPlace?.id, handleMarkerClick]);
 
   if (loadError) return <div className="p-10">지도를 불러오지 못했습니다.</div>;
-  if (!isLoaded || loading) return <div className="p-10">런던으로 여행을 떠나는 중...</div>;
+  if (!isLoaded || loading) return <div className="p-10">에든버러로 여행을 떠나는 중...</div>;
 
   return (
     <div id="post-london">
@@ -191,7 +191,7 @@ export default function LondonPage() {
                   open={open}
                   onOpen={() => setOpen(true)}
                   onClose={() => setOpen(false)}
-                  title="런던의 대표 장소"
+                  title="에든버러의 대표 장소"
                   peekHeight="32vh"
                   halfHeight="50vh"
                   fullHeight="90vh"

@@ -30,12 +30,12 @@ interface Conversation {
   isSaved?: boolean;
 }
 
-const TARGET_IDS = [55,56,58,59,61,62,63,64,70,71,75,76,78,79,81,82];
+const TARGET_IDS = [83,84,88,89,91,93,94,95,96,97];
 const GMAPS_LIBRARIES: ("places" | "geometry" | "drawing" | "visualization")[] = ['places'];
-const DEFAULT_CENTER = { lat: 51.5148, lng: -0.1090 };
-const DEFAULT_ZOOM = 13;
+const DEFAULT_CENTER = { lat: 43.6955, lng: 7.2729 };
+const DEFAULT_ZOOM = 14.8;
 
-export default function LondonPage() {
+export default function NicePage() {
   const router = useRouter();
   const params = useParams();
   const id = params?.id as string | undefined;
@@ -64,7 +64,7 @@ export default function LondonPage() {
 
   const filteredPlaces = useMemo(() => {
     return placeList.filter(
-      (p) => p.cityId === 3 && TARGET_IDS.includes(Number(p.id))
+      (p) => p.cityId === 2 && TARGET_IDS.includes(Number(p.id))
     );
   }, [placeList]);
 
@@ -104,13 +104,13 @@ export default function LondonPage() {
     setSelectedPlace(p);
     panTo(p.lat, p.lng);
     // 최적화 2: Next.js 라우터 이동 시 스크롤 점프를 막고 부드럽게 넘김
-    router.push(`/london/${p.id}`, { scroll: false });
+    router.push(`/nice/${p.id}`, { scroll: false });
     setOpen(true);
   }, [router, panTo]);
 
   const handleMapClick = useCallback(() => {
     setSelectedPlace(null);
-    router.push('/london', { scroll: false });
+    router.push('/nice', { scroll: false });
     panTo(DEFAULT_CENTER.lat, DEFAULT_CENTER.lng, DEFAULT_ZOOM);
     setOpen(false);
   }, [router, panTo]);
@@ -151,7 +151,7 @@ export default function LondonPage() {
   }, [filteredPlaces, selectedPlace?.id, handleMarkerClick]);
 
   if (loadError) return <div className="p-10">지도를 불러오지 못했습니다.</div>;
-  if (!isLoaded || loading) return <div className="p-10">런던으로 여행을 떠나는 중...</div>;
+  if (!isLoaded || loading) return <div className="p-10">니스로 여행을 떠나는 중...</div>;
 
   return (
     <div id="post-london">
@@ -191,7 +191,7 @@ export default function LondonPage() {
                   open={open}
                   onOpen={() => setOpen(true)}
                   onClose={() => setOpen(false)}
-                  title="런던의 대표 장소"
+                  title="니스의 대표 장소"
                   peekHeight="32vh"
                   halfHeight="50vh"
                   fullHeight="90vh"

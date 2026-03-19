@@ -1,65 +1,263 @@
-.card-container { padding: 16px 0; }
-.container.cq { container-type: inline-size; }
-.card-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
-.card { border: 1px solid #e5e7eb; border-radius: 16px; padding: 12px; background: #fff; margin-bottom: 10px; }
-.shadow-soft { box-shadow: 0 8px 16px rgba(0,0,0,0.06); }
-.card-title { margin: 0 0 8px 0; font-weight: 550; font-size: 16px; }
-.card-img { width: 100%; height: auto; border-radius: 12px; display: block; margin-bottom: 12px; }
-.card-list { margin: 0; padding-left: 1em; }
-.chip-pill { border: 1px solid #e5e7eb; border-radius: 999px; padding: 4px 10px; font-size: 12px; background: #f9fafb; color: #374151; white-space: nowrap; }
-.meta-list { list-style: none; margin: 0; padding: 0; display: grid; row-gap: 6px; }
-.meta-list li { display: grid; grid-template-columns: 72px 1fr; column-gap: 8px; align-items: baseline; }
-.meta-key { color: #6b7280; font-size: 12px; }
-.meta-val { color: #111827; font-size: 14px; line-height: 1.4; word-break: break-word; }
-.btn-outline { display: inline-block; border: 1px solid #e5e7eb; border-radius: 8px; padding: 8px 12px; font-size: 14px; text-decoration: none; color: #111827; background: #fff; transition: box-shadow .15s ease, transform .05s ease; }
-.btn-outline:hover { box-shadow: 0 6px 12px rgba(0,0,0,.06); }
-.btn-outline:active { transform: translateY(1px); }
-
-.placecard { padding: 14px; border-radius: 16px; }
-.placecard__header {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 10px;
-}
-.placecard__title { margin: 0; font-weight: 700; font-size: 18px; }
-.placecard__desc { margin: 8px 6px 12px 6px; line-height: 1.55; color: #374151; }
-.placecard__actions { display: flex; gap: 8px; margin-top: 8px; }
-
-.place-description-box {
-  background-color: #f8fafc;
-  border-radius: 12px;
-  padding: 16px;
-  margin: 0;
-  border: 1px solid #f1f5f9;
+/* --- 퀘스트 상단 헤더 영역 --- */
+.quest-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 10px;
+  margin-top: 10px;
 }
 
-.place-description-text {
+.quest-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.quest-header-icon-box {
+  background-color: #e8f5e9;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quest-main-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #111827;
   margin: 0;
+}
+
+/* 닫기 버튼 스타일 조정 */
+.sheetClose {
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.sheetClose:active {
+  background-color: #f3f4f6;
+}
+
+.sheetCloseIcon {
+  width: 24px;
+  height: 24px;
+  fill: #9ca3af;
+}
+
+/* 회색 설명글 */
+.quest-header-desc {
+  font-size: 14px;
+  color: #6b7280;
+  padding: 10px 10px 20px 10px;
+  line-height: 1.5;
+  word-break: keep-all;
+}
+
+/* --- 퀘스트 카드 리스트 컨테이너 --- */
+.quest-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px; /* 카드 간격 살짝 넓힘 */
+  padding: 0 10px 74px 10px;
+}
+
+.quest-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+/* --- 개별 카드 (전체적인 크기 대폭 상향) --- */
+.quest-card {
+  display: flex;
+  align-items: center;
+  background-color: #ffffff;
+  border: 1px solid #f3f4f6;
+  border-radius: 24px; /* 모서리 좀 더 둥글게 */
+  padding: 16px; /* 내부 여백 증가 */
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.04); /* 그림자 살짝 강화 */
+}
+
+/* --- 왼쪽 썸네일 (사진 크기 상향) --- */
+.quest-card-img-box {
+  width: 108px; /* 기존 72px -> 90px */
+  height: 108px; /* 기존 72px -> 90px */
+  border-radius: 18px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.quest-card-img-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* --- 중앙 텍스트 영역 --- */
+.quest-card-info {
+  flex: 1;
+  margin-left: 16px; /* 사진과 텍스트 사이 간격 증가 */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+}
+
+/* 초록색 배지 */
+.quest-badge {
+  display: inline-block;
+  background-color: #e8f5e9;
+  color: #10B981;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  width: fit-content;
+}
+
+/* 제목 영역 */
+.quest-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.quest-name {
+  font-size: 18px; /* 제목 크기 상향 */
+  font-weight: 800;
+  color: #111827;
+  margin: 0;
+}
+
+.quest-subname {
+  font-size: 15px;
+  font-weight: 700;
+  color: #111827;
+}
+
+/* 스탬프 획득 텍스트 */
+.quest-stamp-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #9ca3af;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+/* --- 우측 화살표 --- */
+.quest-arrow {
+  flex-shrink: 0;
+  margin-left: 12px;
+}
+
+/* =======================================
+   🔒 잠긴 장소 카드 전용 스타일
+   ======================================= */
+.quest-card.locked {
+  background-color: #fafafa;
+  border: 1px dashed #e5e7eb;
+  box-shadow: none;
+}
+
+.locked-box {
+  background-color: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.locked-text {
+  color: #9ca3af;
+  font-style: italic;
+}
+
+.locked-subtext {
+  color: #d1d5db;
+  font-weight: 500;
+}
+
+/* ==============================
+   메인 화면 도시 카드 전용 스타일
+   ============================== */
+
+.main-city-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 0 10px 74px 10px;
+}
+
+.main-city-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background-color: #ffffff;
+  border: 1px solid #f3f4f6;
+  border-radius: 24px;
+  padding: 20px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.04);
+}
+
+.main-city-title {
+  font-size: 19px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 4px;
+}
+
+/* 둥근 모서리가 적용된 미디어 래퍼 */
+.main-city-media-wrap {
+  width: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  background-color: #f3f4f6;
+}
+
+.main-city-media-wrap .media-carousel {
+  border-radius: 0;
+}
+
+.main-city-desc {
   font-size: 14.5px;
-  line-height: 1.75;
-  color: #334155;
+  line-height: 1.6;
+  color: #4b5563;
+  margin: 0 4px;
   word-break: keep-all;
   letter-spacing: -0.3px;
 }
 
-/* 캐러셀을 카드 내부 기준으로 고정 */
-.placecard .media-carousel {
-  position: relative;
-  border-radius: 12px;
-  overflow: hidden;
+/* 도시 둘러보기 버튼 */
+.main-city-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   width: 100%;
-  container-type: inline-size; /* 반응형 비율 전환용 */
+  background-color: #f9fafb;
+  color: #111827;
+  border: 1px solid #e5e7eb;
+  padding: 14px;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  margin-top: 4px;
 }
 
-/* 카드 컨테이너 너비에 따라 비율 변경 */
-@container (min-width: 520px) {
-  .placecard .media-slide { aspect-ratio: 16 / 10; }
-}
-@container (min-width: 800px) {
-  .placecard .media-slide { aspect-ratio: 21 / 9; }
-}
-
-/* 작은 화면에서 글이 너무 붙어 보이지 않게 */
-@media (max-width: 480px) {
-  .placecard__title { font-size: 16px; }
-  .placecard__desc { font-size: 14px; }
+.main-city-btn:active {
+  background-color: #f3f4f6;
+  transform: scale(0.98);
 }

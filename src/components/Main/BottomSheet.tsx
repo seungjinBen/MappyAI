@@ -1,12 +1,11 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import Link from 'next/link'; // Next.js용 Link 사용
+import Link from 'next/link';
+import api from '@/lib/axios';
 import '@/css/BottomSheet.css';
 import '@/css/PlaceCards.css';
-import '@/css/MediaCarousel.css';
 
-// --- 타입 정의 ---
 interface Place {
   id: number;
   name: string;
@@ -14,6 +13,8 @@ interface Place {
   city_id?: number;
   imgUrl?: string;
   description?: string;
+  category?: 'A' | 'B' | 'C' | 'D' | 'E';
+  subName?: string;
 }
 
 interface BottomSheetProps {
@@ -29,7 +30,6 @@ interface BottomSheetProps {
 
 type SnapState = 'peek' | 'half' | 'full';
 
-// 1. 도시 ID에 따라 기본 경로를 반환하는 헬퍼 함수
 const getCityBasePath = (cityId?: number) => {
     const id = Number(cityId);
     switch (id) {
@@ -37,28 +37,45 @@ const getCityBasePath = (cityId?: number) => {
         case 2: return '/nice';
         case 3: return '/london';
         case 4: return '/edinburgh';
-        default: return '/paris';
+        default: return '/london';
     }
 };
 
+const CATEGORY_MAP: Record<string, string> = {
+  'A': '관광명소',
+  'B': '음식점',
+  'C': '상점',
+  'D': '대중교통',
+  'E': '기타시설'
+};
+
+const getCategoryName = (category?: string) => {
+  return category && CATEGORY_MAP[category] ? CATEGORY_MAP[category] : '미분류';
+};
+
+const getCategoryLevel = (category?: string) => {
+  switch (category) {
+    case 'A': return 1;
+    case 'B': return 2;
+    case 'C': return 2;
+    case 'D': return 2;
+    case 'E': return 2;
+    default: return 3;
+  }
+};
+
 const BottomSheet: React.FC<BottomSheetProps> = ({
-  placeList,
-  open,
-  onOpen,
-  onClose,
-  title,
-  peekHeight,
-  halfHeight,
-  fullHeight
+  placeList, open, onOpen, onClose, title, peekHeight, halfHeight, fullHeight
 }) => {
     const sheetRef = useRef<HTMLDivElement>(null);
     const [snap, setSnap] = useState<SnapState>('peek');
-
-    // 드래그 상태 관리
     const dragRef = useRef({ dragging: false, startY: 0, startVisiblePx: 0 });
-
-    // Viewport 높이 측정
     const [vh, setVh] = useState(typeof window !== 'undefined' ? window.innerHeight : 800);
+
+    const sortedPlaceList = useMemo(() => {
+        if (!placeList) return [];
+        return [...placeList].sort((a, b) => getCategoryLevel(a.category) - getCategoryLevel(b.category));
+    }, [placeList]);
 
     useEffect(() => {
         const handleResize = () => setVh(window.innerHeight);
@@ -66,7 +83,6 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    // 단위를 Pixel로 변환
     const toPx = useCallback((val: string | number) => {
         if (typeof val === 'number') return val;
         if (typeof val === 'string') {
@@ -82,24 +98,19 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
     const halfPx = useMemo(() => toPx(halfHeight), [halfHeight, toPx]);
     const fullPx = useMemo(() => toPx(fullHeight), [fullHeight, toPx]);
 
-    // 스타일 변수 업데이트
     useEffect(() => {
         const el = sheetRef.current;
         if (!el) return;
-
         el.style.setProperty('--full-height', typeof fullHeight === 'number' ? `${fullHeight}px` : fullHeight.toString());
-
         const targetPx = snap === 'peek' ? peekPx : snap === 'half' ? halfPx : fullPx;
         el.style.setProperty('--visible-height', `${targetPx}px`);
     }, [snap, peekPx, halfPx, fullPx, fullHeight]);
 
-    // 외부 open prop 동기화
     useEffect(() => {
         if (open === undefined) return;
         setSnap(open ? 'half' : 'peek');
     }, [open]);
 
-    // --- 드래그 핸들러 ---
     const onPointerMove = useCallback((e: PointerEvent) => {
         if (!dragRef.current.dragging) return;
         const dy = dragRef.current.startY - e.clientY;
@@ -139,94 +150,206 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
         window.addEventListener('pointerup', onPointerUp);
     };
 
+    const [progressMap, setProgressMap] = useState<Record<number, number>>({});
+
+    useEffect(() => {
+        const fetchProgress = async () => {
+            const token = localStorage.getItem('token');
+            const newProgressMap: Record<number, number> = {};
+
+            if (token) {
+                try {
+                    const res = await api.get('/missions/progress/my', {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    res.data.forEach((item: any) => {
+                        newProgressMap[item.placeId] = item.completedCount;
+                    });
+                    setProgressMap(newProgressMap);
+                    return;
+                } catch (error) {
+                    console.error("서버 진도 로드 실패, 로컬로 대체", error);
+                }
+            }
+
+            try {
+                const localData = JSON.parse(localStorage.getItem('mappy_progress') || '{}');
+                Object.keys(localData).forEach(placeId => {
+                    newProgressMap[Number(placeId)] = localData[placeId].length;
+                });
+                setProgressMap(newProgressMap);
+            } catch (e) {
+                console.error("로컬 데이터 읽기 실패", e);
+            }
+        };
+        if (open) {
+            fetchProgress();
+        }
+    }, [open]);
+
+    // 미션 진행률 계산
+    const totalMissions = placeList?.length || 0;
+    const completedMissions = placeList?.filter(place => (progressMap[place.id] || 0) >= 2).length || 0;
+    const progressPercent = totalMissions === 0 ? 0 : Math.round((completedMissions / totalMissions) * 100);
+
     return (
         <div
             ref={sheetRef}
             className="sheetMain"
             role="dialog"
             aria-modal
-            aria-label={title}
             style={{
                 '--peek-height': `${peekPx}px`,
                 '--full-height': typeof fullHeight === 'number' ? `${fullHeight}px` : fullHeight,
             } as React.CSSProperties}
             onClick={snap === 'peek' ? onOpen : undefined}
         >
-            <div
-                className="sheetHeader"
-                onPointerDown={onPointerDown}
-                style={{ touchAction: 'none' }} // 드래그 시 브라우저 기본 동작 방지
-            >
-                <div className="sheetGrabber" title="끌어올리거나 내려서 열기/닫기" />
-                <div className="sheetHeaderRow">
-                    <div className="sheetTitle">{title}</div>
-                    <button
-                        type="button"
-                        className="sheetClose"
-                        onClick={(e) => { e.stopPropagation(); setSnap('peek'); onClose?.(); }}
-                    >
-                        <svg viewBox="0 0 24 24" className="sheetCloseIcon"><path d="M6.4 5l5.6 5.6L17.6 5 19 6.4 13.4 12 19 17.6 17.6 19 12 13.4 6.4 19 5 17.6 10.6 12 5 6.4 6.4 5z" /></svg>
+            <div className="sheetHeader" onPointerDown={onPointerDown} style={{ touchAction: 'none' }}>
+                <div className="sheetGrabber" />
+                
+                <div className="quest-header-top">
+                    <div className="quest-title-wrap">
+                        <div className="quest-header-icon-box">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" width="20" height="20">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                <circle cx="12" cy="10" r="3"></circle>
+                            </svg>
+                        </div>
+                        <h2 className="quest-main-title">{title}</h2>
+                    </div>
+                    
+                    <button type="button" className="sheetClose" onClick={(e) => { e.stopPropagation(); setSnap('peek'); onClose?.(); }}>
+                        <svg viewBox="0 0 24 24" className="sheetCloseIcon">
+                            <path d="M6.4 5l5.6 5.6L17.6 5 19 6.4 13.4 12 19 17.6 17.6 19 12 13.4 6.4 19 5 17.6 10.6 12 5 6.4 6.4 5z" />
+                        </svg>
                     </button>
                 </div>
-                <div style={{ fontSize: '13px', color: '#888', marginTop: '4px', lineHeight: '1.4', paddingBottom: '8px' }}>
-                    마커를 클릭해 <strong>현지 상황에 딱 맞는 회화</strong>를 배워보세요!
+                
+                <div className="quest-header-desc">
+                    지도를 탐험하며 숨겨진 미션을 완성해보세요!
                 </div>
+
+                <div className="city-progress-container" style={{ marginTop: '10px', padding: '0 4px', paddingBottom: '10px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                        <span style={{ fontSize: '13px', fontWeight: '700', color: '#4B5563' }}>미션 달성률</span>
+                        <span style={{ fontSize: '14px', fontWeight: '800', color: '#10B981' }}>
+                            {progressPercent}% <span style={{ fontSize: '12px', color: '#9CA3AF', fontWeight: '600', marginLeft: '2px' }}>({completedMissions}/{totalMissions})</span>
+                        </span>
+                    </div>
+                    <div style={{ width: '100%', height: '8px', backgroundColor: '#E5E7EB', borderRadius: '999px', overflow: 'hidden' }}>
+                        <div style={{
+                            width: `${progressPercent}%`,
+                            height: '100%',
+                            backgroundColor: '#10B981',
+                            borderRadius: '999px',
+                            transition: 'width 0.8s cubic-bezier(0.4, 0, 0.2, 1)'
+                        }}></div>
+                    </div>
+                </div>
+
             </div>
 
             <div className="sheetContent" onClick={(e) => e.stopPropagation()}>
-                <section className="card-container">
-                    <div className="container cq">
-                        <div className="card-grid mq-2col">
-                            {placeList && placeList.map(place => {
-                                const basePath = getCityBasePath(place.cityId || place.city_id);
+                <div className="quest-list-container">
+                    {sortedPlaceList.map((place) => {
+                        const basePath = getCityBasePath(place.cityId || place.city_id);
+                        const categoryName = getCategoryName(place.category);
+                        const level = getCategoryLevel(place.category);
 
-                                return (
-                                    <article key={place.id} className="card shadow-soft">
-                                        <div style={{ display: 'flex', margin: '0 0 10px 5px', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-                                            <h3 className="card-title" style={{ marginBottom: 0 }}>
-                                                {place.name ?? '이름 없음'}
-                                            </h3>
-                                        </div>
+                        const completedCount = progressMap[place.id] || 0;
+                        const isCompleted = completedCount >= 2;
 
-                                        <div className="media-carousel">
-                                            <div className="media-viewport">
-                                                <div className="media-slide">
-                                                    <img
-                                                        className="media-img"
-                                                        src={place.imgUrl || '/placeholder.jpg'}
-                                                        alt={place.name}
-                                                        loading="lazy"
-                                                    />
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {place.description && (
-                                            <p style={{
-                                                fontSize: '14px', lineHeight: '1.6', color: '#333333', margin: '6px',
-                                                wordBreak: 'keep-all', letterSpacing: '-0.3px'
-                                            }}>
-                                                {place.description}
-                                            </p>
+                        return (
+                            <Link key={place.id} href={`${basePath}/${place.id}`} className="quest-card-link">
+                                <article 
+                                    className="quest-card"
+                                    style={{ 
+                                        opacity: isCompleted ? 0.7 : 1, 
+                                        backgroundColor: isCompleted ? '#F9FAFB' : '#FFFFFF', 
+                                        border: isCompleted ? '1px solid #E5E7EB' : '1px solid #F3F4F6'
+                                    }}
+                                >
+                                    <div className="quest-card-img-box" style={{ position: 'relative', overflow: 'hidden' }}>
+                                        <img src={place.imgUrl || '/placeholder.jpg'} alt={place.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        
+                                        {isCompleted && (
+                                            <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.3)' }}></div>
                                         )}
+                                    </div>
 
-                                        <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-                                            <Link
-                                                className="btn-outline"
-                                                href={`${basePath}/${place.id}`}
-                                                style={{ width: '100%', fontWeight: '550', textAlign: 'center', justifyContent: 'center', display: 'flex', alignItems: 'center' }}
-                                            >
-                                                실전 회화 연습하기
-                                            </Link>
+                                    <div className="quest-card-info">
+                                        <div className="quest-badge" 
+                                             style={{ 
+                                                 backgroundColor: isCompleted ? '#F3F4F6' : '', 
+                                                 color: isCompleted ? '#6B7280' : '' 
+                                             }}>
+                                            LV {level}. {categoryName}
                                         </div>
-                                    </article>
-                                );
-                            })}
+                                        
+                                        <div className="quest-titles">
+                                            <h3 className="quest-name" style={{ color: isCompleted ? '#6B7280' : '#1F2937' }}>
+                                                {place.name}
+                                            </h3>
+                                            {place.subName && (
+                                                <span className="quest-subname" style={{ color: isCompleted ? '#9CA3AF' : '' }}>
+                                                    ({place.subName})
+                                                </span>
+                                            )}
+                                        </div>
+                                        
+                                        <div className="quest-stamp-status" 
+                                             style={{ 
+                                                 color: isCompleted ? '#10B981' : '#6B7280', 
+                                                 fontWeight: isCompleted ? '700' : '500' 
+                                             }}>
+                                            {isCompleted ? (
+                                                <>
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="2.5" width="16" height="16">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                                    </svg>
+                                                    미션 완료!
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                                                    </svg>
+                                                    대화 미션 도전하기
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="quest-arrow">
+                                        {isCompleted ? (
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" width="22" height="22">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                        ) : (
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="#D1D5DB" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" width="22" height="22">
+                                                <polyline points="9 18 15 12 9 6"></polyline>
+                                            </svg>
+                                        )}
+                                    </div>
+                                </article>
+                            </Link>
+                        );
+                    })}
+
+                    <article className="quest-card locked">
+                        <div className="quest-card-img-box locked-box">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#D1D5DB" strokeWidth="2" width="28" height="28">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                <circle cx="12" cy="10" r="3"></circle>
+                            </svg>
                         </div>
-                    </div>
-                </section>
+                        <div className="quest-card-info">
+                            <h3 className="quest-name locked-text">잠긴 장소...</h3>
+                            <div className="quest-stamp-status locked-subtext">추후 업로드 예정</div>
+                        </div>
+                    </article>
+                </div>
             </div>
-            <div className="sheetMask" />
         </div>
     );
 }

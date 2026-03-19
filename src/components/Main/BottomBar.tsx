@@ -5,58 +5,53 @@ import { useAuth } from '@/context/AuthContext';
 import { Map, Search, BookOpen } from 'lucide-react';
 import '@/css/BottomBar.css';
 
-// --- 타입 정의 ---
 interface BottomBarProps {
-    activeSheet: 'search' | 'saved' | null;
-    onOpenSearch?: () => void;
-    onOpenSaved?: () => void;
-    onCloseAll?: () => void;
+    isSearchOpen: boolean;
+    onOpenSearch: () => void;
+    onCloseSearch: () => void;
 }
 
 export default function BottomBar({ 
-    activeSheet, 
+    isSearchOpen, 
     onOpenSearch, 
-    onOpenSaved, 
-    onCloseAll 
+    onCloseSearch 
 }: BottomBarProps) {
     const pathname = usePathname();
     const router = useRouter();
     const { isLoggedIn } = useAuth();
 
-    // 시트 상태 확인
-    const isSheetOpen = activeSheet !== null;
-    const isSearchActive = activeSheet === 'search';
-    const isSavedActive = activeSheet === 'saved';
+    // 현재 상태 판별 (버튼 색상 활성화용)
+    // 1. 저장됨 버튼: 현재 주소가 '/saved' 이면 활성화
+    const isSavedActive = pathname === '/saved';
+    // 2. 검색 버튼: MainLayout에서 isSearchOpen이 true라고 알려주면 활성화
+    const isSearchActive = isSearchOpen;
+    // 3. 지도 버튼: 저장됨 화면도 아니고, 검색창도 안 열려있으면 활성화
+    const isMapActive = !isSavedActive && !isSearchOpen;
 
-    // 지도 탭 활성화 조건: 시트가 닫혀있으면 활성화 상태로 표시
-    const isMapActive = !isSheetOpen;
-
-    // 핵심 로직: 지도 버튼 클릭 핸들러
     const handleMapClick = () => {
-        // 1. 시트가 열려 있다면? -> 시트만 닫고 끝
-        if (isSheetOpen) {
-            if (onCloseAll) onCloseAll();
-            return;
+        if (isSearchOpen) {
+            onCloseSearch();
         }
-
-        // 2. 시트가 닫혀 있는데, 현재 위치가 메인('/')이 아니라면? -> 메인으로 이동
         if (pathname !== '/') {
             router.push('/');
-            return;
         }
     };
 
     const handleSearchClick = () => {
-        if (onOpenSearch) onOpenSearch();
+        onOpenSearch();
     };
 
     const handleSavedClick = () => {
+        if (isSearchOpen) {
+            onCloseSearch();
+        }
+
         if (!isLoggedIn) {
             if (window.confirm("로그인이 필요한 서비스입니다.\n로그인 하시겠습니까?")) {
                 router.push('/login');
             }
         } else {
-            if (onOpenSaved) onOpenSaved();
+            router.push('/saved'); 
         }
     };
 
@@ -95,7 +90,7 @@ export default function BottomBar({
                         </span>
                     </button>
 
-                    {/* 3. 내 회화노트 */}
+                    {/* 3. 내 회화노트 (저장됨) */}
                     <button
                       className={`btn ${isSavedActive ? 'active' : ''}`}
                       onClick={handleSavedClick}
@@ -106,9 +101,10 @@ export default function BottomBar({
                             className="btn-text" 
                             style={{ fontWeight: isSavedActive ? 'bold' : '500' }}
                         >
-                          저장됨
+                            저장됨
                         </span>
                     </button>
+
                 </div>
             </div>
         </nav>

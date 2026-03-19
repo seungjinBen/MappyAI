@@ -2,10 +2,9 @@
 
 import React, { useEffect, useState } from 'react';
 import { Volume2, Plane, Utensils, MapPin, Trash2, X } from 'lucide-react';
-import api from '@/lib/axios'; // ✅ 이전에 만든 axios 설정 사용
+import api from '@/lib/axios';
 import '@/css/PostCard.css';
 
-// --- 타입 정의 ---
 interface SavedConversation {
   savedId: number;
   conversationId: number;
@@ -34,7 +33,6 @@ const PostCard: React.FC<PostCardProps> = ({ isOpen, onClose }) => {
   }, [isOpen]);
 
   const fetchSavedConversations = async () => {
-    // 인터셉터에서 토큰을 넣어주므로 별도의 토큰 추출이 필요 없습니다.
     setLoading(true);
     try {
       const response = await api.get('/bookmarks/my');

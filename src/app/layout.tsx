@@ -33,7 +33,7 @@ export default function RootLayout({
       >
         <AuthProvider>
           <DataProvider>
-            {/* MainLayout으로 감싸서 전역 바텀바와 시트 상태를 유지합니다. */}
+            {/* MainLayout으로 감싸서 전역 바텀바와 시트 상태를 유지 */}
             <MainLayout>
               {children}
             </MainLayout>

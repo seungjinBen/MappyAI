@@ -7,7 +7,7 @@ import {
   Search, X, XCircle, ShoppingBag, MapPin, 
   MessageCircle, ArrowDownRight, Camera, Coffee, Map 
 } from 'lucide-react';
-import '@/css/PostCard.css'; 
+
 import '@/css/PostSearch.css';
 
 // --- 타입 정의 ---
@@ -58,27 +58,41 @@ export default function PostSearch({ isOpen, onClose }: PostSearchProps) {
 
   // --- 카테고리 데이터 ---
   const categories: Category[] = [
-    { id: 'tour', label: '관광 명소', code: 'A', icon: <Camera size={20} color="#3B82F6" />, bg: '#EFF6FF' },
-    { id: 'cafe', label: '카페 주문', code: 'B', icon: <Coffee size={20} color="#F97316" />, bg: '#FFF7ED' },
-    { id: 'shopping', label: '쇼핑/계산', code: 'C', icon: <ShoppingBag size={20} color="#10B981" />, bg: '#ECFDF5' },
-    { id: 'directions', label: '길 묻기', code: 'D', icon: <Map size={20} color="#8B5CF6" />, bg: '#F5F3FF' },
+    { id: 'tour', label: '관광 명소', code: 'a', icon: <Camera size={20} color="#3B82F6" />, bg: '#EFF6FF' },
+    { id: 'cafe', label: '카페 주문', code: 'b', icon: <Coffee size={20} color="#F97316" />, bg: '#FFF7ED' },
+    { id: 'shopping', label: '쇼핑/계산', code: 'c', icon: <ShoppingBag size={20} color="#10B981" />, bg: '#ECFDF5' },
+    { id: 'directions', label: '길 묻기', code: 'd', icon: <Map size={20} color="#8B5CF6" />, bg: '#F5F3FF' },
   ];
 
   // --- 검색 가이드 데이터 ---
   const searchGuides: SearchGuide[] = [
-    { keyword: '사진', preview: '개선문을 배경으로 사진 한 장만 찍어주시겠어요?', type: 'conv', id: 10 },
-    { keyword: '화장실', preview: '이 근처에 무료 공중화장실이 있나요?', type: 'conv', id: 15 },
+    { keyword: '사진', preview: '빅 벤을 배경으로 저희 사진 한 장만 찍어주시겠어요?', type: 'conv', id: 64 },
+    { keyword: '길', preview: '여기서 칼턴 힐 가는 길을 알려주실 수 있나요?', type: 'conv', id: 115 },
     { keyword: '에펠탑', preview: '에펠탑 (장소)', type: 'place', id: 1 }
   ];
 
+  const ALLOWED_PLACE_IDS = [
+    1,3,5,6,8,9,12,14,15,17,19,21,22,24,25,27,34,35,36,37,51,52,
+    55,56,58,59,61,62,63,64,70,71,75,76,78,79,81,82,83,84,88,89,
+    91,93,94,95,96,97,102,103,105,106,108,111,114,115,116,118
+  ];
+
   // 2. 검색 로직
-  const handleSearch = async (query: string = searchText) => {
+const handleSearch = async (query: string = searchText) => {
     if (!query.trim()) return;
     try {
       const response = await api.get<SearchResult>('/places/search', {
         params: { query }
       });
-      setSearchResult(response.data);
+      
+      const filteredPlaces = response.data.places.filter(place => 
+        ALLOWED_PLACE_IDS.includes(Number(place.id))
+      );
+      const filteredConvs = response.data.conversations.filter(conv => 
+        ALLOWED_PLACE_IDS.includes(Number(conv.placeId))
+      );
+
+      setSearchResult({ places: filteredPlaces, conversations: filteredConvs });
       setIsSearched(true);
     } catch (error) {
       console.error("검색 실패:", error);
@@ -88,10 +102,15 @@ export default function PostSearch({ isOpen, onClose }: PostSearchProps) {
   const handleCategoryClick = async (categoryCode: string, categoryLabel: string) => {
     setSearchText(categoryLabel);
     try {
-      const response = await api.get<Conversation[]>('/conversations/category', {
+      const response = await api.get<Conversation[]>('/conversations/section', {
         params: { code: categoryCode }
       });
-      setSearchResult({ places: [], conversations: response.data });
+      
+      const filteredConvs = response.data.filter(conv => 
+        ALLOWED_PLACE_IDS.includes(Number(conv.placeId))
+      );
+
+      setSearchResult({ places: [], conversations: filteredConvs });
       setIsSearched(true);
     } catch (error) {
       console.error("카테고리 조회 실패:", error);
