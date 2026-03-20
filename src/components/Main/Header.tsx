@@ -37,7 +37,7 @@ const Header: React.FC = () => {
     const [isAdmin, setIsAdmin] = useState(false);
     const [userEmail, setUserEmail] = useState('');
     
-    // 🌟 드롭다운 모달 상태 및 참조
+    // 드롭다운 모달 상태 및 참조
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -109,7 +109,7 @@ const Header: React.FC = () => {
                 {/* 로고 영역 */}
                 <div className="logo" style={{ display: 'flex', alignItems: 'center' }}>
                     <Link href="/">
-                        <img src="/MappyLOGO.png" alt="Mappy English" style={{ height: '85px', display: 'block' }} />
+                        <img src="/MappyLogo.png" alt="Mappy English" style={{ height: '85px', display: 'block' }} />
                     </Link>
                 </div>
 

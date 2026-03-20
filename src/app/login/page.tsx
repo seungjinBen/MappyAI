@@ -66,8 +66,8 @@ export default function LoginPage() {
     const handleKakaoLogin = () => {
         const KAKAO_CLIENT_ID = "8fbb449948ca62f55dd4a24f756f7a7b";
         
-        const REDIRECT_URI = "http://localhost:3000/auth/kakao/callback";
-        
+        // 내 컴퓨터에서는 'http://localhost:3000', Vercel에서는 'https://mappy-...vercel.app'
+        const REDIRECT_URI = `${window.location.origin}/auth/kakao/callback`;
         const KAKAO_AUTH_URL = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code`;
         
         window.location.href = KAKAO_AUTH_URL;
