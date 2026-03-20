@@ -52,7 +52,6 @@ const Header: React.FC = () => {
         }
     }, [isLoggedIn]);
 
-    // 🌟 팝업 바깥을 클릭하면 자동으로 닫히게 만드는 센스!
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -110,15 +109,13 @@ const Header: React.FC = () => {
                 {/* 로고 영역 */}
                 <div className="logo" style={{ display: 'flex', alignItems: 'center' }}>
                     <Link href="/">
-                        <img src="/mappyLOGO.png" alt="Mappy English" style={{ height: '85px', display: 'block' }} />
+                        <img src="/MappyLOGO.png" alt="Mappy English" style={{ height: '85px', display: 'block' }} />
                     </Link>
                 </div>
 
-                {/* 우측 상단 아이콘 버튼 영역 */}
                 <div className="header-actions" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                     {isLoggedIn ? (
                         <>
-                            {/* 관리자 버튼 */}
                             {isAdmin && (
                                 <button
                                     onClick={() => router.push('/admin/generator')}
@@ -132,9 +129,7 @@ const Header: React.FC = () => {
                                 </button>
                             )}
 
-                            {/* 🌟 내 정보 드롭다운 영역 */}
                             <div ref={dropdownRef} style={{ position: 'relative' }}>
-                                {/* 기존 내 정보 버튼 (누르면 팝업 토글) */}
                                 <button
                                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                                     style={{
@@ -148,7 +143,6 @@ const Header: React.FC = () => {
                                     </svg>
                                 </button>
 
-                                {/* 🌟 드롭다운 모달창 */}
                                 {isDropdownOpen && (
                                     <div style={{
                                         position: 'absolute', top: '40px', right: '0', width: '220px',
@@ -156,7 +150,6 @@ const Header: React.FC = () => {
                                         boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
                                         border: '1px solid #E5E7EB', overflow: 'hidden', zIndex: 1000
                                     }}>
-                                        {/* 유저 이메일 표시 구역 */}
                                         <div style={{ padding: '16px', borderBottom: '1px solid #F3F4F6', backgroundColor: '#F9FAFB' }}>
                                             <p style={{ fontSize: '12px', color: '#6B7280', marginBottom: '4px' }}>로그인된 계정</p>
                                             <p style={{ fontSize: '14px', fontWeight: 'bold', color: '#111827', wordBreak: 'break-all' }}>
@@ -164,7 +157,6 @@ const Header: React.FC = () => {
                                             </p>
                                         </div>
                                         
-                                        {/* 메뉴 버튼들 */}
                                         <div style={{ padding: '8px 0' }}>
                                             <button onClick={handleDeleteAccount} style={dropdownMenuItemStyle}>
                                                 <span style={{ color: '#4B5563' }}>회원 탈퇴</span>
