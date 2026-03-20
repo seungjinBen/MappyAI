@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { MapPin, PlaneTakeoff, Mic, MessageSquare, Stamp } from 'lucide-react';
 import api from '@/lib/axios';
@@ -19,7 +19,7 @@ const getCityName = (id: number) => {
     return 'UNKNOWN CITY';
 };
 
-export default function SharePage() {
+function ShareLogic() {
     const searchParams = useSearchParams();
     const router = useRouter();
     
@@ -44,7 +44,7 @@ export default function SharePage() {
     // 오늘 날짜 포맷팅
     const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 
-    return (
+return (
         <div style={{ 
             backgroundColor: '#E5E7EB',
             minHeight: '100vh', 
@@ -152,5 +152,13 @@ export default function SharePage() {
                 }
             `}</style>
         </div>
+    )
+}
+
+export default function SharePage() {
+    return (
+        <Suspense fallback={<div>공유 데이터를 불러오는 중입니다... ⏳</div>}>
+            <ShareLogic />
+        </Suspense>
     );
 }
