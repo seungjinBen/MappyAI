@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { MapPin, PlaneTakeoff, Mic, MessageSquare, Stamp } from 'lucide-react';
 import api from '@/lib/axios';
+export const dynamic = 'force-dynamic';
 
 const getCityName = (id: number) => {
     const paris = [1, 3, 5, 6, 8, 9, 12, 14, 15, 17, 19, 21, 22, 24, 25, 27, 34, 35, 37, 51, 52];
