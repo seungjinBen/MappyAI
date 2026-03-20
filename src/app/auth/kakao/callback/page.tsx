@@ -1,15 +1,14 @@
 "use client";
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import api from '@/lib/axios';
 
-export default function KakaoCallbackPage() {
+function KakaoCallbackLogic() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const code = searchParams.get('code');
     
-    // (React 18 Strict Mode)useEffect가 두 번 실행되는 것을 막음
     const hasFetched = useRef(false); 
 
     useEffect(() => {
@@ -54,5 +53,14 @@ export default function KakaoCallbackPage() {
                 잠시만 기다려주세요! ✈️
             </p>
         </div>
+    );
+}
+
+// Suspense
+export default function KakaoCallbackPage() {
+    return (
+        <Suspense fallback={<div>카카오와 연결 중...</div>}>
+            <KakaoCallbackLogic />
+        </Suspense>
     );
 }
