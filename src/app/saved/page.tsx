@@ -140,8 +140,7 @@ export default function SavedCardsPage() {
 
             <main className="card-list-container">
                 {savedList.length === 0 ? (
-                    <div className="empty-state" style={{ /* 기존 스타일 생략 */ }}>
-                        <BookOpen size={60} strokeWidth={1.5} style={{ opacity: 0.5, marginBottom: '20px' }} />
+                    <div className="empty-state">
                         <p style={{ textAlign: 'center', lineHeight: '1.6', margin: 0 }}>
                             아직 저장한 대화가 없습니다.<br/>
                             지도에서 대화를 연습하고 북마크를 눌러보세요!
