@@ -384,7 +384,7 @@ export default function ChatQuestPage() {
     const currentLine = lines[currentIndex];
     const bgImageUrl = place?.imgUrl || 'https://images.unsplash.com/photo-1513635269975-5969336ac1cb?q=80&w=1000&auto=format&fit=crop';
 
-    // 🌟 엽서 스타일 미션 완료 화면 🌟
+    // 엽서 스타일 미션 완료 화면 
     if (showCompletion) {
         const cityName = getCityName(place?.cityId || place?.city_id);
         const cityNameE = getCityNameE(place?.cityId || place?.city_id);
@@ -402,8 +402,7 @@ export default function ChatQuestPage() {
                 try {
                     await navigator.share({
                         title: 'Mappy English 여행 기록',
-                        text: '저의 영어 회화 여행 기록을 구경해보세요!',
-                        url: shareUrl,
+                        url: shareUrl, 
                     });
                 } catch (error) {
                     console.log('공유 취소됨');
