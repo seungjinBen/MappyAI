@@ -10,6 +10,12 @@ export const metadata: Metadata = {
   title: "Mappy English | 지도로 배우는 유럽 여행 영어 회화",
   description: "유럽 여행, 이제 겁내지 마세요! 장소별 미션으로 배우는 실전 여행 영어 서비스, Mappy English.",
   keywords: ["유럽여행", "여행영어", "영어회화", "실전영어", "Mappy English"],
+  verification: {
+    other: {
+      "naver-site-verification": "b60a2b0dc8e484d381da866f6c204b1207b1a801",
+    },
+  },
+  
   openGraph: {
     title: "Mappy English - 나만의 여행 영어 지도",
     description: "지도 위의 장소를 클릭하고 실전 회화 미션을 완료하세요!",
