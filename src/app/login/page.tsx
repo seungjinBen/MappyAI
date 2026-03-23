@@ -4,7 +4,7 @@ import React, { useState, useEffect, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
-import { CheckCircle2, Mail, Lock } from 'lucide-react'; // 아이콘 추가
+import { CheckCircle2, Mail, Lock, MessageSquare, Send, X } from 'lucide-react'; // 아이콘 추가
 import api from '@/lib/axios';
 import '@/css/LoginPage.css';
 
@@ -15,6 +15,11 @@ export default function LoginPage() {
 
     const { isLoggedIn, login } = useAuth();
     const router = useRouter();
+
+    const [showContactModal, setShowContactModal] = useState(false);
+    const [contactEmail, setContactEmail] = useState('');
+    const [contactMessage, setContactMessage] = useState('');
+    const [isSending, setIsSending] = useState(false);
 
     useEffect(() => {
         if (isLoggedIn) {
@@ -61,6 +66,7 @@ export default function LoginPage() {
             router.push('/');
         }
     };
+    
 
     // 카카오 버튼 클릭 함수
     const handleKakaoLogin = () => {
@@ -72,6 +78,27 @@ export default function LoginPage() {
         
         window.location.href = KAKAO_AUTH_URL;
     };
+
+    const handleContactSubmit = async (e: FormEvent) => {
+        e.preventDefault();
+        if (isSending) return;
+
+        try {
+            setIsSending(true);
+            await api.post('/contact/send', { 
+                email: contactEmail, 
+                message: contactMessage 
+            });
+            alert('소중한 의견이 전송되었습니다. 감사합니다!');
+            setShowContactModal(false);
+            setContactEmail('');
+            setContactMessage('');
+        } catch (error) {
+            alert('전송에 실패했습니다. 나중에 다시 시도해주세요.');
+        } finally {
+            setIsSending(false);
+        }
+    }
 
     // 이미 로그인된 경우
     if (isLoggedIn) {
@@ -157,6 +184,48 @@ export default function LoginPage() {
                         회원가입 하고 시작하기
                     </Link>
                 </div>
+
+                <div className="contact-trigger-container">
+                    <button className="contact-trigger-btn" onClick={() => setShowContactModal(true)}>
+                        <MessageSquare size={14} /> 의견 보내기
+                    </button>
+                </div>
+                {showContactModal && (
+                    <div className="modal-overlay" onClick={() => setShowContactModal(false)}>
+                        <div className="contact-modal" onClick={(e) => e.stopPropagation()}>
+                            <div className="modal-header">
+                                <h3>의견 보내기</h3>
+                                <button className="modal-close" onClick={() => setShowContactModal(false)}><X size={20}/></button>
+                            </div>
+                            <form onSubmit={handleContactSubmit} className="contact-form">
+                                <div className="input-group">
+                                    <label className="input-label">답변 받을 이메일</label>
+                                    <input 
+                                        className="login-input" 
+                                        type="email" 
+                                        placeholder="example@email.com"
+                                        value={contactEmail}
+                                        onChange={(e) => setContactEmail(e.target.value)}
+                                        required 
+                                    />
+                                </div>
+                                <div className="input-group">
+                                    <label className="input-label">문의 내용</label>
+                                    <textarea 
+                                        className="contact-textarea" 
+                                        placeholder="불편한 점이나 개선 아이디어를 자유롭게 적어주세요."
+                                        value={contactMessage}
+                                        onChange={(e) => setContactMessage(e.target.value)}
+                                        required
+                                    />
+                                </div>
+                                <button type="submit" className="login-btn" disabled={isSending}>
+                                    {isSending ? '전송 중...' : <><Send size={18} style={{marginRight: '8px'}}/> 의견 전송하기</>}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

@@ -190,3 +190,94 @@
     font-weight: 900;
     font-size: 1.2rem;
 }
+
+/* 의견 보내기 버튼 */
+.contact-trigger-container {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.contact-trigger-btn {
+    background: none;
+    border: none;
+    color: #9CA3AF;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.2s;
+}
+
+.contact-trigger-btn:hover {
+    color: #6B7280;
+    text-decoration: underline;
+}
+
+/* 모달 오버레이 */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+}
+
+/* 문의하기 모달창 */
+.contact-modal {
+    background: #fff;
+    width: 90%;
+    max-width: 400px;
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.2);
+    animation: modalSlideUp 0.3s ease-out;
+}
+
+@keyframes modalSlideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.modal-header h3 {
+    font-size: 20px;
+    font-weight: 800;
+    color: #111827;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    color: #9CA3AF;
+    cursor: pointer;
+}
+
+/* 텍스트 에어리어 전용 스타일 */
+.contact-textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 14px;
+    font-size: 15px;
+    border: 2px solid #F3F4F6;
+    border-radius: 14px;
+    outline: none;
+    resize: none;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.contact-textarea:focus {
+    border-color: #10B981;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+}
