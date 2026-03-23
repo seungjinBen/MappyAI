@@ -1,21 +1,21 @@
 .sheetMain {
-      position: fixed;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      z-index: 50;
-      background: #fff;
-      border-top-left-radius: 16px;
-      border-top-right-radius: 16px;
-      box-shadow: 0 -8px 28px rgba(0,0,0,0.08);
-      height: calc(var(--full-height, 85vh) - 44px);
-      display: flex; flex-direction: column; overflow: hidden;
-      transform: translateY(calc(100% - var(--visible-height, var(--peek-height, 160px))));
-      transition: transform 260ms cubic-bezier(.22,.61,.36,1);
-      will-change: transform;
-
-      padding-bottom: env(safe-area-inset-bottom);
-      -webkit-tap-highlight-color: transparent;
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    max-width: 480px;
+    width: 100%;
+    transform: translateX(-50%) translateY(calc(100% - var(--visible-height, 160px)));
+    z-index: 50;
+    background: #fff;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    box-shadow: 0 -8px 28px rgba(0,0,0,0.08);
+    height: calc(var(--full-height, 85vh) - 44px);
+    display: flex; flex-direction: column; overflow: hidden;
+    transition: transform 260ms cubic-bezier(.22,.61,.36,1);
+    will-change: transform;
+    padding-bottom: env(safe-area-inset-bottom);
+    -webkit-tap-highlight-color: transparent;
 }
 
 /* 헤더를 상대배치로 바꿔 버튼/그립 배치 */

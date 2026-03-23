@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '@/lib/axios'; 
 import { Bookmark, BookmarkCheck } from 'lucide-react';
 
 interface BookmarkButtonProps {
@@ -15,8 +15,8 @@ const BookmarkButton: React.FC<BookmarkButtonProps> = ({
   initialIsSaved
 }) => {
   const [isSaved, setIsSaved] = useState<boolean>(initialIsSaved);
+  const [isLoading, setIsLoading] = useState<boolean>(false); 
 
-  // 부모 컴포넌트(ConvCards)에서 props가 갱신될 때 상태 동기화
   useEffect(() => {
     setIsSaved(initialIsSaved);
   }, [initialIsSaved]);
@@ -24,8 +24,10 @@ const BookmarkButton: React.FC<BookmarkButtonProps> = ({
   const toggleSave = async (e: React.MouseEvent) => {
     e.stopPropagation();
 
-    if (typeof window === 'undefined') return;
+    // 1. 이미 요청 중이면 바로 리턴 (광클 방어)
+    if (isLoading) return;
 
+    if (typeof window === 'undefined') return;
     const token = localStorage.getItem('token');
 
     if (!token) {
@@ -34,31 +36,29 @@ const BookmarkButton: React.FC<BookmarkButtonProps> = ({
     }
 
     try {
+      // 2. 요청 시작 - 버튼 잠금
+      setIsLoading(true);
+
       const config = {
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
         params: { conversationId }
       };
 
       if (isSaved) {
-        await axios.delete(`/api/bookmarks`, config);
-        alert("저장이 취소되었습니다.");
+        await api.delete(`/bookmarks`, config);
         setIsSaved(false);
       } else {
-        // POST 메서드: url, data, config 순서이므로 두 번째 인자는 null
-        await axios.post(`/api/bookmarks`, null, config);
-        alert("대화가 저장되었습니다!");
+        await api.post(`/bookmarks`, null, config);
         setIsSaved(true);
       }
     } catch (error: any) {
       console.error("저장 기능 오류:", error);
-
-      if (error.response?.status === 401 || error.response?.status === 403) {
-        alert("세션이 만료되었습니다. 다시 로그인해주세요.");
-      } else {
+      
+      if (error.response?.status !== 401 && error.response?.status !== 403) {
         alert("처리에 실패했습니다. 잠시 후 다시 시도해주세요.");
       }
+    } finally {
+      // 3. 성공하든 실패하든 요청 끝났으니 다시 버튼 잠금 해제
+      setIsLoading(false);
     }
   };
 
@@ -66,14 +66,17 @@ const BookmarkButton: React.FC<BookmarkButtonProps> = ({
     <button
       type="button"
       onClick={toggleSave}
+      disabled={isLoading} 
       style={{
         background: 'none',
         border: 'none',
-        cursor: 'pointer',
+        cursor: isLoading ? 'not-allowed' : 'pointer', 
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '4px'
+        padding: '4px',
+        opacity: isLoading ? 0.6 : 1,
+        transition: 'all 0.2s ease'
       }}
       aria-label={isSaved ? "북마크 취소" : "북마크 저장"}
     >

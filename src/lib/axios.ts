@@ -12,11 +12,11 @@ const api = axios.create({
 api.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
         // Next.js는 서버에서도 코드를 실행하려 하므로, 
-        // localStorage 접근 전 반드시 브라우저(window) 환경인지 확인해야 합니다.
+        // localStorage 접근 전 반드시 브라우저(window) 환경인지 확인해야 함.
         if (typeof window !== 'undefined') {
             const token = localStorage.getItem('token');
 
-            // ★ 토큰이 실제 존재하고, 유효한 문자열일 때만 Bearer 헤더 추가
+            // 토큰이 실제 존재하고, 유효한 문자열일 때만 Bearer 헤더 추가
             if (token && token !== 'null' && token !== 'undefined') {
                 config.headers.Authorization = `Bearer ${token}`;
             }
@@ -28,15 +28,20 @@ api.interceptors.request.use(
     }
 );
 
-// 3. 응답 인터셉터 (선택 사항 - 토큰 만료 처리 등)
+// 3. 응답 인터셉터
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        // 401 에러(인증 만료) 시 자동 로그아웃 로직 등을 추가할 수 있습니다.
-        if (error.response?.status === 401) {
+        const status = error.response?.status;
+
+        // 401(Unauthorized): 토큰 만료 등 인증 실패
+        // 403(Forbidden): 접근 권한 없음 (계정 문제 등)
+        if (status === 401 || status === 403) {
             if (typeof window !== 'undefined') {
                 localStorage.removeItem('token');
-                // window.location.href = '/login'; // 필요 시 주석 해제
+                localStorage.removeItem('user'); 
+
+                window.location.href = '/login';
             }
         }
         return Promise.reject(error);
