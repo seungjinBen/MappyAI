@@ -298,14 +298,12 @@
 
 /* 퀘스트 완료 화면 */
 .completion-wrapper {
-    position: fixed;
+position: fixed;
     top: 0;
+    left: 0;
+    right: 0;
     bottom: 0;
-    left: 50%;                 
-    transform: translateX(-50%); 
-    width: 100%;       
-    max-width: 480px;
-    inset: 0;
+    width: 100%;
     z-index: 10000;
     display: flex;
     flex-direction: column;
@@ -316,9 +314,7 @@
     background-size: 20px 20px;
     animation: fadeIn 0.5s ease-out;
     overflow-y: auto;
-    justify-content: flex-start; 
-    overflow-y: auto; 
-    -webkit-overflow-scrolling: touch; 
+    -webkit-overflow-scrolling: touch;
 }
 
 @keyframes fadeIn {
@@ -357,14 +353,10 @@
 .postcard-card {
     background-color: #ffffff;
     width: 100%;
-    max-width: 420px;
-    border-radius: 8px;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.1), 0 5px 15px rgba(0,0,0,0.05);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+    max-width: 400px; 
+    border-radius: 12px; 
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
     margin-bottom: 24px;
-    animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
     flex-shrink: 0;
 }
 
