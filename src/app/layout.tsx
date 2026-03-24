@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { GoogleAnalytics } from '@next/third-parties/google';
 
 import { AuthProvider } from '@/context/AuthContext';
 import { DataProvider } from '@/context/DataContext';
@@ -52,6 +53,7 @@ export default function RootLayout({
             <MainLayout>
               {children}
             </MainLayout>
+            <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID || ""} />
           </DataProvider>
         </AuthProvider>
       </body>
