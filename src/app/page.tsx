@@ -3,9 +3,11 @@
 import React, { useEffect, useMemo, useState, useRef, useCallback } from 'react';
 import Header from '@/components/Main/Header';
 import BottomSheetMain from '@/components/Main/BottomSheetMain';
+import PermissionModal from '@/components/Main/PermissionModal';
 import { useRouter } from 'next/navigation';
 import { GoogleMap, useJsApiLoader, OverlayView } from '@react-google-maps/api';
 import { useData } from '@/context/DataContext';
+import { checkInAppBrowser } from '@/lib/utils';
 
 import '@/css/PostParis.css'; 
 
@@ -32,10 +34,44 @@ export default function PostMain() {
     const mapRef = useRef<google.maps.Map | null>(null);
     const [open, setOpen] = useState(false);
     const [showBottomList, setShowBottomList] = useState(false);
+    const [showPermissionModal, setShowPermissionModal] = useState(false);
 
     const context = useData();
     const placeList = (context?.placeList as Place[]) || [];
     const loading = context?.loading || false;
+
+    // 자동 탈출 및 권한 체크 로직
+    useEffect(() => {
+        const { isInApp, isAndroid } = checkInAppBrowser();
+
+        // 안드로이드 인앱 브라우저 자동 탈출 꼼수
+        if (isInApp && isAndroid) {
+            const url = window.location.href.replace(/https?:\/\//, "");
+            window.location.href = `intent://${url}#Intent;scheme=https;package=com.android.chrome;end`;
+            return; 
+        }
+
+        // 마이크 권한 상태 체크
+        if (navigator.permissions && navigator.permissions.query) {
+            navigator.permissions.query({ name: 'microphone' as PermissionName }).then((result) => {
+                if (result.state === 'prompt' || isInApp) {
+                    setShowPermissionModal(true);
+                }
+            });
+        }
+    }, []);
+
+    // 권한 허용하기 버튼 클릭 시 실행
+    const handlePermissionConfirm = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            stream.getTracks().forEach(track => track.stop());
+            setShowPermissionModal(false);
+        } catch (err) {
+            alert("마이크 권한이 거부되었습니다. 설정에서 마이크를 허용해주셔야 원활한 이용이 가능합니다!");
+            setShowPermissionModal(false);
+        }
+    };
 
     useEffect(() => {
         const timer = setTimeout(() => setShowBottomList(true), 300);
@@ -146,6 +182,12 @@ export default function PostMain() {
                     </div>
                 </main>
             </div>
+            {showPermissionModal && (
+                <PermissionModal 
+                    onConfirm={handlePermissionConfirm} 
+                    onClose={() => setShowPermissionModal(false)} 
+                />
+            )}
         </div>
     );
 }
