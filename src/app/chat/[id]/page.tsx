@@ -55,7 +55,7 @@ export default function ChatQuestPage() {
     const [loading, setLoading] = useState(true);
     const [showCompletion, setShowCompletion] = useState(false);
 
-    const [sttFeedback, setSttFeedback] = useState<{ score: number, recognizedText: string } | null>(null);
+    const [sttFeedback, setSttFeedback] = useState<{ score: number, recognizedText: string, feedback?: string } | null>(null);
     const [hintText, setHintText] = useState<string | null>(null);
 
     const [completedCount, setCompletedCount] = useState<number>(0);
@@ -182,7 +182,7 @@ export default function ChatQuestPage() {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
 
-            const { score: originalScore, recognizedText } = response.data;
+            const { score: originalScore, recognizedText, feedback } = response.data;
             let finalScore = originalScore;
 
             if (hintLevelRef.current === 1) {
@@ -191,7 +191,8 @@ export default function ChatQuestPage() {
                 finalScore = Math.min(originalScore, 80); 
             }
 
-            setSttFeedback({ score: finalScore, recognizedText });
+            // 상태에 feedback 추가 저장
+            setSttFeedback({ score: finalScore, recognizedText, feedback });
 
             if (finalScore >= 70) {
                 setTimeout(() => {
@@ -199,7 +200,7 @@ export default function ChatQuestPage() {
                     setHintText(null); 
                     setVisibleLines(prev => [...prev, lines[currentIndex]]);
                     setCurrentIndex(prev => prev + 1); 
-                }, 2000);
+                }, 4000); 
             } else {
                 const words = targetText.split(' ');
                 const hideIndexes = [words.length - 1];
@@ -218,7 +219,7 @@ export default function ChatQuestPage() {
 
                 setTimeout(() => {
                     setSttFeedback(null);
-                }, 3000);
+                }, 4000); 
             }
         } catch (error) {
             console.error("오디오 전송 및 채점 실패:", error);
@@ -421,7 +422,7 @@ export default function ChatQuestPage() {
                     <p className="completion-sub-title">나만의 여행 엽서가 도착했습니다 ✈️</p>
                 </div>
 
-                {/* 💌 엽서(Postcard) 컨테이너 */}
+                {/* 엽서(Postcard) 컨테이너 */}
                 <div className="postcard-card">
                     
                     {/* 1. 상단 이미지 */}
@@ -618,14 +619,19 @@ export default function ChatQuestPage() {
                     color: 'white', padding: '12px 20px', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
                     zIndex: 100, width: '90%', textAlign: 'center', transition: 'all 0.3s ease'
                 }}>
-                    <div style={{ fontSize: '22px', fontWeight: 'bold', marginBottom: '6px' }}>
+                    <div style={{ fontSize: '24px', fontWeight: '900', marginBottom: '8px', letterSpacing: '1px' }}>
                         {sttFeedback.score}점
                     </div>
-                    <div style={{ fontSize: '14px', opacity: 0.9 }}>
-                        {sttFeedback.score >= 70 ? '🎉 훌륭합니다! 다음 대화로 넘어갑니다.' : '💪 아쉬워요! 다시 한번 크게 말해보세요.'}
+
+                    <div style={{ fontSize: '15px', fontWeight: '600', opacity: 0.95, lineHeight: '1.4', wordBreak: 'keep-all', marginBottom: '12px' }}>
+                        {sttFeedback.feedback 
+                            ? `💡 ${sttFeedback.feedback}` 
+                            : (sttFeedback.score >= 70 ? '🎉 훌륭합니다! 다음 대화로 넘어갑니다.' : '💪 아쉬워요! 다시 한번 크게 말해보세요.')
+                        }
                     </div>
-                    <div style={{ marginTop: '12px', padding: '8px', backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: '8px', fontSize: '13px' }}>
-                        <span style={{ display: 'block', marginBottom: '4px', opacity: 0.8 }}>AI가 들은 내용:</span>
+                    
+                    <div style={{ padding: '10px', backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: '8px', fontSize: '13px', lineHeight: '1.3' }}>
+                        <span style={{ display: 'block', marginBottom: '4px', opacity: 0.8, fontSize: '11px', fontWeight: 'bold' }}>AI가 들은 문장</span>
                         "{sttFeedback.recognizedText}"
                     </div>
                 </div>
