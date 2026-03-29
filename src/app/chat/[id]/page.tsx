@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
-import { X, Volume2, Mic, Share2, Map, MapPin, ChevronRight, Lock } from 'lucide-react';
+import { X, Volume2, Mic, Share2, Map, MapPin, ChevronRight, Lock, Keyboard, Send } from 'lucide-react';
 import api from '@/lib/axios';
 import BookmarkButton from '@/components/Main/BookmarkButton';
 import '@/css/ChatPage.css';
@@ -60,6 +60,10 @@ export default function ChatQuestPage() {
 
     const [completedCount, setCompletedCount] = useState<number>(0);
     const [journalText, setJournalText] = useState<string>('');
+
+    const [inputMode, setInputMode] = useState<'voice' | 'text'>('voice');
+    const [textInput, setTextInput] = useState('');
+    const [isEvaluatingText, setIsEvaluatingText] = useState(false);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -172,6 +176,7 @@ export default function ChatQuestPage() {
         else startRecording();
     };
 
+    // 오디오 전송 로직
     const sendAudioToBackend = async (audioBlob: Blob, targetText: string) => {
         try {
             const formData = new FormData();
@@ -182,48 +187,79 @@ export default function ChatQuestPage() {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
 
-            const { score: originalScore, recognizedText, feedback } = response.data;
-            let finalScore = originalScore;
-
-            if (hintLevelRef.current === 1) {
-                finalScore = Math.min(originalScore, 90); 
-            } else if (hintLevelRef.current === 2) {
-                finalScore = Math.min(originalScore, 80); 
-            }
-
-            // 상태에 feedback 추가 저장
-            setSttFeedback({ score: finalScore, recognizedText, feedback });
-
-            if (finalScore >= 70) {
-                setTimeout(() => {
-                    setSttFeedback(null);
-                    setHintText(null); 
-                    setVisibleLines(prev => [...prev, lines[currentIndex]]);
-                    setCurrentIndex(prev => prev + 1); 
-                }, 4000); 
-            } else {
-                const words = targetText.split(' ');
-                const hideIndexes = [words.length - 1];
-                if (words.length > 3) hideIndexes.push(Math.floor(words.length / 2));
-
-                const hintWords = words.map((word, i) => {
-                    if (hideIndexes.includes(i)) {
-                        const firstChar = word.charAt(0);
-                        const underscores = '_'.repeat(Math.max(word.length - 1, 3)); 
-                        return `${firstChar}${underscores}`;
-                    }
-                    return word; 
-                });
-                
-                setHintText(hintWords.join(' '));
-
-                setTimeout(() => {
-                    setSttFeedback(null);
-                }, 4000); 
-            }
+            handleEvaluationResponse(response.data, targetText);
         } catch (error) {
             console.error("오디오 전송 및 채점 실패:", error);
             alert("음성 인식 중 오류가 발생했습니다.");
+        }
+    };
+
+    // 텍스트 전송 로직
+    const handleTextSubmit = async () => {
+        if (!textInput.trim() || isEvaluatingText) return;
+
+        setIsEvaluatingText(true);
+        const targetText = lines[currentIndex].englishText;
+
+        try {
+            // 스프링 부트에 @RequestParam 으로 보내기 위해 FormData 사용
+            const formData = new FormData();
+            formData.append('userText', textInput.trim());
+            formData.append('targetText', targetText);
+
+            const response = await api.post('/stt/evaluate-text', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+
+            handleEvaluationResponse(response.data, targetText);
+            
+            setTextInput('');
+        } catch (error) {
+            console.error("텍스트 전송 및 채점 실패:", error);
+            alert("텍스트 평가 중 오류가 발생했습니다.");
+        } finally {
+            setIsEvaluatingText(false);
+        }
+    };
+
+    const handleEvaluationResponse = (responseData: any, targetText: string) => {
+        const { score: originalScore, recognizedText, feedback } = responseData;
+        let finalScore = originalScore;
+
+        if (hintLevelRef.current === 1) {
+            finalScore = Math.min(originalScore, 90); 
+        } else if (hintLevelRef.current === 2) {
+            finalScore = Math.min(originalScore, 80); 
+        }
+
+        setSttFeedback({ score: finalScore, recognizedText, feedback });
+
+        if (finalScore >= 70) {
+            setTimeout(() => {
+                setSttFeedback(null);
+                setHintText(null); 
+                setVisibleLines(prev => [...prev, lines[currentIndex]]);
+                setCurrentIndex(prev => prev + 1); 
+            }, 4000); 
+        } else {
+            const words = targetText.split(' ');
+            const hideIndexes = [words.length - 1];
+            if (words.length > 3) hideIndexes.push(Math.floor(words.length / 2));
+
+            const hintWords = words.map((word, i) => {
+                if (hideIndexes.includes(i)) {
+                    const firstChar = word.charAt(0);
+                    const underscores = '_'.repeat(Math.max(word.length - 1, 3)); 
+                    return `${firstChar}${underscores}`;
+                }
+                return word; 
+            });
+            
+            setHintText(hintWords.join(' '));
+
+            setTimeout(() => {
+                setSttFeedback(null);
+            }, 4000); 
         }
     };
 
@@ -304,7 +340,7 @@ export default function ChatQuestPage() {
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [visibleLines, isWaitingForNPC]);
+    }, [visibleLines, isWaitingForNPC, sttFeedback]); // 피드백 팝업이 뜰 때도 스크롤 조정
 
     useEffect(() => {
         if (showModal || lines.length === 0 || currentIndex >= lines.length) return;
@@ -385,7 +421,6 @@ export default function ChatQuestPage() {
     const currentLine = lines[currentIndex];
     const bgImageUrl = place?.imgUrl || 'https://images.unsplash.com/photo-1513635269975-5969336ac1cb?q=80&w=1000&auto=format&fit=crop';
 
-    // 엽서 스타일 미션 완료 화면 
     if (showCompletion) {
         const cityName = getCityName(place?.cityId || place?.city_id);
         const cityNameE = getCityNameE(place?.cityId || place?.city_id);
@@ -396,7 +431,6 @@ export default function ChatQuestPage() {
             const textToShare = journalText.trim() !== '' ? journalText : defaultPlaceholder;
             const encodedText = encodeURIComponent(textToShare);
             const placeId = place?.id || place?.city_id;
-            
             const shareUrl = `${window.location.origin}/share?placeId=${placeId}&text=${encodedText}`;
 
             if (navigator.share) {
@@ -416,33 +450,22 @@ export default function ChatQuestPage() {
 
         return (
             <div className="completion-wrapper">
-                {/* 헤더 안내문 */}
                 <div className="completion-header">
                     <h1 className="completion-main-title">QUEST COMPLETE!</h1>
                     <p className="completion-sub-title">나만의 여행 엽서가 도착했습니다 ✈️</p>
                 </div>
-
-                {/* 엽서(Postcard) 컨테이너 */}
                 <div className="postcard-card">
-                    
-                    {/* 1. 상단 이미지 */}
                     <div className="postcard-img-area">
                         <img src={bgImageUrl} alt={place?.name} />
                     </div>
-
-                    {/* 2. 하단 내용 영역 */}
                     <div className="postcard-content-area">
-                        {/* 도장 효과 (심플 텍스트) */}
                     <div style={{ position: 'absolute', top: '-15px', left: '20px', color: 'rgba(239, 68, 68, 0.6)', transform: 'rotate(-15deg)', border: '2px solid rgba(239, 68, 68, 0.6)', borderRadius: '50%', padding: '10px', fontSize: '10px', fontWeight: 'bold', letterSpacing: '1px' }}>
                         <div>{cityNameE}</div>
                         <div>{today}</div>
                     </div>
-
                         <div className="postcard-place-info">
                             <MapPin size={18} /> <span>{place?.name}에서</span>
                         </div>
-
-                        {/* 잠금 여부에 따른 입력창 렌더링 */}
                         {completedCount < 2 ? (
                             <div className="postcard-locked-wrapper">
                                 <div className="postcard-text-area postcard-blur-text">
@@ -464,8 +487,6 @@ export default function ChatQuestPage() {
                         )}
                     </div>
                 </div>
-
-                {/* 하단 버튼 액션 */}
                 <div className="completion-actions">
                     {completedCount >= 2 ? (
                         <button className="btn-primary" onClick={handleShare}>
@@ -484,7 +505,6 @@ export default function ChatQuestPage() {
         );
     }
 
-    // 메인 채팅 화면
     return (
         <div className="chat-quest-wrapper">
             <header className="chat-header">
@@ -609,20 +629,20 @@ export default function ChatQuestPage() {
                     </div>
                 )}
                 
-                <div ref={messagesEndRef} />
+                <div ref={messagesEndRef} style={{ height: '40px' }} />
             </main>
 
             {sttFeedback && (
                 <div className="stt-feedback-toast" style={{
-                    position: 'absolute', bottom: '140px', left: '50%', transform: 'translateX(-50%)',
+                    position: 'absolute', bottom: '160px', left: '50%', transform: 'translateX(-50%)',
                     backgroundColor: sttFeedback.score >= 70 ? '#10B981' : '#EF4444', 
-                    color: 'white', padding: '12px 20px', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                    color: 'white', padding: '16px 20px', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
                     zIndex: 100, width: '90%', textAlign: 'center', transition: 'all 0.3s ease'
                 }}>
                     <div style={{ fontSize: '24px', fontWeight: '900', marginBottom: '8px', letterSpacing: '1px' }}>
                         {sttFeedback.score}점
                     </div>
-
+                    
                     <div style={{ fontSize: '15px', fontWeight: '600', opacity: 0.95, lineHeight: '1.4', wordBreak: 'keep-all', marginBottom: '12px' }}>
                         {sttFeedback.feedback 
                             ? `💡 ${sttFeedback.feedback}` 
@@ -638,26 +658,71 @@ export default function ChatQuestPage() {
             )}  
 
             <div className="chat-bottom-sheet">
-                <div className="hints-row">
-                    {hints.map((hint, i) => (
-                        <span key={i} className="hint-chip">{hint}</span>
-                    ))}
+                <div className="bottom-sheet-controls">
+                    <div className="hints-row">
+                        {hints.map((hint, i) => (
+                            <span key={i} className="hint-chip">{hint}</span>
+                        ))}
+                    </div>
+                    
+                    {!isMissionComplete && currentLine?.isMe && (
+                        <button 
+                            onClick={() => setInputMode(prev => prev === 'voice' ? 'text' : 'voice')}
+                            style={{ 
+                                background: 'transparent', border: 'none', color: '#6B7280', 
+                                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px', fontWeight: 'bold' 
+                            }}
+                        >
+                            {inputMode === 'voice' ? <Keyboard size={18} /> : <Mic size={18} />}
+                            {inputMode === 'voice' ? '직접 입력하기' : '마이크로 말하기'}
+                        </button>
+                    )}
                 </div>
                 
-                <button 
-                    className={`mic-btn ${isRecording ? 'recording' : ''}`}
-                    onClick={toggleRecording}
-                    disabled={(!isMissionComplete && !currentLine?.isMe) || isWaitingForNPC || showModal}
-                    style={{ opacity: (!currentLine?.isMe && !isMissionComplete) ? 0.5 : 1 }}
-                >
-                    {isMissionComplete ? <ChevronRight size={38} color="#fff" /> : <Mic size={36} color="#fff" />}
-                </button>
-                
-                <p className="mic-instruction">
-                    {isMissionComplete ? "대화를 복습하고 다음으로 넘어가세요" : 
-                     isRecording ? "듣고 있습니다..." : 
-                     (currentLine?.isMe ? "마이크를 눌러 영어로 말해보세요" : "상대방의 말을 들어보세요")}
-                </p>
+                {inputMode === 'voice' || isMissionComplete || !currentLine?.isMe ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <button 
+                            className={`mic-btn ${isRecording ? 'recording' : ''}`}
+                            onClick={toggleRecording}
+                            disabled={(!isMissionComplete && !currentLine?.isMe) || isWaitingForNPC || showModal}
+                            style={{ opacity: (!currentLine?.isMe && !isMissionComplete) ? 0.5 : 1 }}
+                        >
+                            {isMissionComplete ? <ChevronRight size={38} color="#fff" /> : <Mic size={36} color="#fff" />}
+                        </button>
+                        
+                        <p className="mic-instruction">
+                            {isMissionComplete ? "대화를 복습하고 다음으로 넘어가세요" : 
+                             isRecording ? "듣고 있습니다..." : 
+                             (currentLine?.isMe ? "마이크를 눌러 영어로 말해보세요" : "상대방의 말을 들어보세요")}
+                        </p>
+                    </div>
+                ) : (
+                    <div style={{ display: 'flex', gap: '8px', width: '100%', alignItems: 'center' }}>
+                        <input
+                            type="text"
+                            value={textInput}
+                            onChange={(e) => setTextInput(e.target.value)}
+                            placeholder={isEvaluatingText ? "AI가 채점 중입니다..." : "영어로 문장을 입력해보세요"}
+                            onKeyDown={(e) => { if (e.key === 'Enter') handleTextSubmit(); }}
+                            disabled={(!isMissionComplete && !currentLine?.isMe) || isWaitingForNPC || showModal || isEvaluatingText}
+                            style={{ 
+                                flex: 1, padding: '14px 20px', borderRadius: '24px', border: '1px solid #E5E7EB', 
+                                outline: 'none', fontSize: '15px', backgroundColor: isEvaluatingText ? '#F3F4F6' : '#FFFFFF'
+                            }}
+                        />
+                        <button
+                            onClick={handleTextSubmit}
+                            disabled={!textInput.trim() || isEvaluatingText}
+                            style={{ 
+                                backgroundColor: (!textInput.trim() || isEvaluatingText) ? '#D1D5DB' : '#10B981', 
+                                color: 'white', width: '48px', height: '48px', borderRadius: '50%', border: 'none', 
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: (!textInput.trim() || isEvaluatingText) ? 'not-allowed' : 'pointer', transition: 'all 0.2s' 
+                            }}
+                        >
+                            <Send size={20}/>
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );

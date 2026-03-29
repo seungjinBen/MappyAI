@@ -227,7 +227,7 @@
 .chat-bottom-sheet {
     background-color: #ffffff;
     border-radius: 32px 32px 0 0;
-    padding: 24px 20px calc(48px + env(safe-area-inset-bottom));
+    padding: 24px 20px calc(72px + env(safe-area-inset-bottom));
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -238,6 +238,14 @@
     transform: translateX(-50%);
     width: 100%;
     max-width: 480px;
+}
+
+.bottom-sheet-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 12px; /* 🌟 입력창(바)과의 여백을 여기서 넉넉하게 줍니다! */
 }
 
 /* 하단 안내 텍스트 */
@@ -252,7 +260,6 @@
 .hints-row {
     display: flex;
     gap: 10px;
-    margin-bottom: 20px;
 }
 
 .hint-chip {
@@ -263,6 +270,78 @@
     padding: 6px 14px;
     border-radius: 999px;
     border: 1px solid #E5E7EB;
+}
+
+.mode-toggle-btn {
+    background: transparent;
+    border: none;
+    color: #6B7280;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+}
+
+.mode-toggle-btn:active {
+    background-color: #F3F4F6;
+}
+
+/* 텍스트 입력 모드 UI */
+.text-input-wrapper {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.text-input-field:focus {
+    border-color: #10B981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.text-input-field:disabled {
+    background-color: #F3F4F6;
+    color: #9CA3AF;
+}
+
+.text-send-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    padding: 0; /* 불필요한 패딩 제거 */
+}
+
+.text-send-btn:disabled {
+    background-color: #D1D5DB;
+    cursor: not-allowed;
+}
+
+.text-send-btn:not(:disabled) {
+    background-color: #10B981;
+    color: white;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+.text-send-btn:not(:disabled):active {
+    transform: scale(0.95);
+}
+
+.text-send-btn svg {
+    margin-right: 2px;
+    margin-top: 2px;
 }
 
 /* 마이크 버튼 */

@@ -8,7 +8,8 @@ import { useRouter } from 'next/navigation';
 import { GoogleMap, useJsApiLoader, OverlayView } from '@react-google-maps/api';
 import { useData } from '@/context/DataContext';
 import { checkInAppBrowser } from '@/lib/utils';
-
+import api from '@/lib/axios';
+import { Send, Loader2, CheckCircle2, MapPin } from 'lucide-react';
 import '@/css/PostParis.css'; 
 
 interface Place {
@@ -40,30 +41,86 @@ export default function PostMain() {
     const placeList = (context?.placeList as Place[]) || [];
     const loading = context?.loading || false;
 
-    // 자동 탈출 및 권한 체크 로직
+    // 온보딩 관련 상태 관리
+    const [showOnboarding, setShowOnboarding] = useState(false);
+    const [onboardingStep, setOnboardingStep] = useState<1 | 2 | 3>(1); // 1: 입력, 2: 채점중, 3: 결과
+    const [onboardingInput, setOnboardingInput] = useState('');
+    const [onboardingResult, setOnboardingResult] = useState<{ score: number, feedback: string } | null>(null);
+
+    // 초기 진입 로직 수정
     useEffect(() => {
         const { isInApp, isAndroid } = checkInAppBrowser();
 
-        // 안드로이드 인앱 브라우저 자동 탈출 꼼수
         if (isInApp && isAndroid) {
             const url = window.location.href.replace(/https?:\/\//, "");
             window.location.href = `intent://${url}#Intent;scheme=https;package=com.android.chrome;end`;
             return; 
         }
 
-        // 마이크 권한 상태 체크
-        if (navigator.permissions && navigator.permissions.query) {
-            navigator.permissions.query({ name: 'microphone' as PermissionName }).then((result) => {
-                if (result.state === 'prompt' || isInApp) {
+        const checkMicPermission = async () => {
+            try {
+                if (navigator.permissions && navigator.permissions.query) {
+                    const result = await navigator.permissions.query({ name: 'microphone' as PermissionName });
+                    if (result.state === 'prompt' || result.state === 'denied' || isInApp) {
+                        setShowPermissionModal(true);
+                    }
+                } else {
                     setShowPermissionModal(true);
                 }
-            });
+            } catch (error) {
+                setShowPermissionModal(true);
+            }
+        };
+
+        // 로컬 스토리지에서 온보딩 완료 여부 확인
+        const hasDoneOnboarding = localStorage.getItem('mappy_onboarding_done');
+        
+        if (!hasDoneOnboarding) {
+            setTimeout(() => setShowOnboarding(true), 1000);
+        } else {
+            checkMicPermission();
         }
     }, []);
 
-    // 권한 허용하기 버튼 클릭 시 실행
+    const handleOnboardingSubmit = async () => {
+        if (!onboardingInput.trim()) return;
+        
+        setOnboardingStep(2); 
+
+        try {
+            const formData = new FormData();
+            formData.append('userText', onboardingInput.trim());
+            formData.append('targetText', "Can I get an Americano please"); // 온보딩 정답 기준
+
+            const response = await api.post('/stt/evaluate-text', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+
+            setOnboardingResult({
+                score: response.data.score,
+                feedback: response.data.feedback || "의미가 잘 통합니다!"
+            });
+
+            setOnboardingStep(3);
+
+        } catch (error) {
+            console.error("온보딩 채점 에러:", error);
+            // 에러 시 임시 통과 처리 (UX 끊김 방지)
+            setOnboardingResult({ score: 100, feedback: "서버 연결이 원활하지 않지만, 훌륭한 시도예요!" });
+            setOnboardingStep(3);
+        }
+    };
+
+    const completeOnboarding = () => {
+        localStorage.setItem('mappy_onboarding_done', 'true');
+        setShowOnboarding(false);
+        setTimeout(() => setShowPermissionModal(true), 500); 
+    };
+
     const handlePermissionConfirm = async () => {
         try {
+            const unlockAudio = new Audio();
+            unlockAudio.play().catch(() => {});
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             stream.getTracks().forEach(track => track.stop());
             setShowPermissionModal(false);
@@ -182,12 +239,104 @@ export default function PostMain() {
                     </div>
                 </main>
             </div>
+            {showOnboarding && (
+                <div style={{
+                    position: 'fixed', inset: 0, backgroundColor: 'rgba(17, 24, 39, 0.75)', 
+                    backdropFilter: 'blur(4px)', zIndex: 9999, display: 'flex', 
+                    alignItems: 'center', justifyContent: 'center', padding: '20px'
+                }}>
+                    <div style={{
+                        backgroundColor: '#ffffff', borderRadius: '24px', padding: '32px 24px',
+                        width: '100%', maxWidth: '400px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                        animation: 'fadeInUp 0.5s ease-out'
+                    }}>
+                        {onboardingStep === 1 && (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                <div style={{ textAlign: 'center' }}>
+                                    <div style={{ fontSize: '32px', marginBottom: '12px' }}>☕️</div>
+                                    <h2 style={{ fontSize: '20px', fontWeight: '800', color: '#111827', margin: '0 0 8px 0', lineHeight: '1.4' }}>
+                                        파파고 없이 현지 카페에서<br/>커피를 주문할 수 있나요?
+                                    </h2>
+                                    <p style={{ color: '#6B7280', fontSize: '14px', margin: 0, lineHeight: '1.5' }}>
+                                        AI 선생님과 함께 1분 맛보기 미션을 풀어보세요!
+                                    </p>
+                                </div>
+                                
+                                <div style={{ backgroundColor: '#F0FDF4', padding: '16px', borderRadius: '12px', border: '1px solid #DCFCE7' }}>
+                                    <div style={{ fontSize: '12px', fontWeight: '800', color: '#10B981', marginBottom: '4px' }}>MISSION</div>
+                                    <div style={{ fontSize: '16px', fontWeight: '700', color: '#111827' }}>"아메리카노 하나 주시겠어요?"</div>
+                                </div>
+
+                                <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                                    <input 
+                                        type="text" 
+                                        value={onboardingInput}
+                                        onChange={(e) => setOnboardingInput(e.target.value)}
+                                        placeholder="이 문장을 영어로 적어보세요!"
+                                        onKeyDown={(e) => e.key === 'Enter' && handleOnboardingSubmit()}
+                                        style={{ flex: 1, padding: '14px 16px', borderRadius: '12px', border: '1px solid #E5E7EB', outline: 'none', fontSize: '15px' }}
+                                    />
+                                    <button 
+                                        onClick={handleOnboardingSubmit}
+                                        disabled={!onboardingInput.trim()}
+                                        style={{ backgroundColor: onboardingInput.trim() ? '#10B981' : '#D1D5DB', color: 'white', border: 'none', borderRadius: '12px', width: '52px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: onboardingInput.trim() ? 'pointer' : 'not-allowed' }}
+                                    >
+                                        <Send size={20} />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {onboardingStep === 2 && (
+                            <div style={{ textAlign: 'center', padding: '40px 0' }}>
+                                <Loader2 size={40} color="#10B981" style={{ animation: 'spin 1s linear infinite', margin: '0 auto 16px auto' }} />
+                                <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#111827', margin: '0 0 8px 0' }}>AI 원어민이 채점 중입니다...</h3>
+                                <p style={{ color: '#6B7280', fontSize: '14px', margin: 0 }}>문맥과 의미를 꼼꼼히 살피고 있어요!</p>
+                            </div>
+                        )}
+
+                        {onboardingStep === 3 && onboardingResult && (
+                            <div style={{ textAlign: 'center' }}>
+                                <CheckCircle2 size={56} color="#10B981" style={{ margin: '0 auto 16px auto' }} />
+                                <h2 style={{ fontSize: '22px', fontWeight: '800', color: '#111827', margin: '0 0 8px 0' }}>
+                                    {onboardingResult.score >= 70 ? "오, 의미가 완벽해요! 🎉" : "훌륭한 시도였어요! 💪"}
+                                </h2>
+                                <p style={{ color: '#4B5563', fontSize: '15px', lineHeight: '1.5', margin: '0 0 24px 0', wordBreak: 'keep-all' }}>
+                                   [ AI 피드백: {onboardingResult.feedback} ] <br/><br/>
+                                    <strong>미션을 깨고 해당 장소의 스탬프를 획득하세요!</strong>
+                                </p>
+
+                                <button 
+                                    onClick={completeOnboarding}
+                                    style={{ width: '100%', padding: '16px', backgroundColor: '#111827', color: 'white', border: 'none', borderRadius: '12px', fontSize: '16px', fontWeight: '700', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                                >
+                                    <MapPin size={20} /> 지도로 가서 미션 시작하기
+                                </button>
+                                
+                                <button 
+                                    onClick={() => {
+                                        localStorage.setItem('mappy_onboarding_done', 'true');
+                                        setShowOnboarding(false);
+                                    }}
+                                    style={{ background: 'none', border: 'none', color: '#9CA3AF', fontSize: '13px', marginTop: '16px', cursor: 'pointer', textDecoration: 'underline' }}
+                                >
+                                    일단 눈으로만 둘러볼게요
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
             {showPermissionModal && (
                 <PermissionModal 
                     onConfirm={handlePermissionConfirm} 
                     onClose={() => setShowPermissionModal(false)} 
                 />
             )}
+            <style dangerouslySetInnerHTML={{__html: `
+                @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+                @keyframes spin { 100% { transform: rotate(360deg); } }
+            `}} />
         </div>
     );
 }
