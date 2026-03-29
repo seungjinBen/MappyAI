@@ -8,11 +8,11 @@
 /* 가로 스크롤로 작은 화면 대응 */
 .category-bar .buttons{
   display:flex;
-  gap:6px; /* 간격 살짝 좁힘 (공간 확보) */
+  gap:6px; 
   overflow-x:auto;
   -webkit-overflow-scrolling:touch;
   scrollbar-width: none;
-  padding: 2px 2px; /* 좌우 여백 추가해서 첫/마지막 칩 잘림 방지 */
+  padding: 2px 2px; 
 }
 .category-bar .buttons::-webkit-scrollbar{ display:none; }
 
@@ -117,4 +117,32 @@
   white-space: nowrap;
   box-shadow: 0 2px 5px rgba(0,0,0,0.2);
   pointer-events: none;
+}
+
+/* 잠긴 마커  */
+.custom-marker-container.locked {
+  animation: none;
+  filter: grayscale(100%) opacity(0.6); 
+  z-index: 0;
+}
+.custom-marker-container.locked .marker-photo-circle {
+  border-color: #9CA3AF; 
+}
+.custom-marker-container.locked .marker-name-tag {
+  background: #6B7280;
+  color: #E5E7EB;
+}
+
+/* 클리어한 마커  */
+.custom-marker-container.cleared {
+  animation: none; 
+  z-index: 5;
+}
+.custom-marker-container.cleared .marker-photo-circle {
+  border-color: #F59E0B; 
+  box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+}
+.custom-marker-container.cleared .marker-name-tag {
+  background: #F59E0B; 
+  color: #fff;
 }

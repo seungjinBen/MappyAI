@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import Link from 'next/link';
 import api from '@/lib/axios';
+import { Lock } from 'lucide-react'; // 🌟 자물쇠 아이콘 추가
 import '@/css/BottomSheet.css';
 import '@/css/PlaceCards.css';
 
@@ -15,6 +16,7 @@ interface Place {
   description?: string;
   category?: 'A' | 'B' | 'C' | 'D' | 'E';
   subName?: string;
+  stage?: number; // 🌟 stage 타입 추가
 }
 
 interface BottomSheetProps {
@@ -71,11 +73,47 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
     const [snap, setSnap] = useState<SnapState>('peek');
     const dragRef = useRef({ dragging: false, startY: 0, startVisiblePx: 0 });
     const [vh, setVh] = useState(typeof window !== 'undefined' ? window.innerHeight : 800);
+    const [progressMap, setProgressMap] = useState<Record<number, number>>({});
 
+    // 현재 열린 스테이지 계산 로직 
+    const currentStage = useMemo(() => {
+        if (!placeList || placeList.length === 0) return 1;
+
+        let stageToUnlock = 1;
+        const maxStage = Math.max(...placeList.map(p => p.stage || 1), 1);
+
+        for (let s = 1; s < maxStage; s++) {
+            const placesInThisStage = placeList.filter(p => (p.stage || 1) === s);
+            const isAllCleared = placesInThisStage.every(p => (progressMap[p.id] || 0) > 0);
+
+            if (isAllCleared) {
+                stageToUnlock = s + 1;
+            } else {
+                break;
+            }
+        }
+        return stageToUnlock;
+    }, [placeList, progressMap]);
+
+    // 정렬: 진행 중(미완료+열림) -> 잠김 -> 완료됨 순서로 
     const sortedPlaceList = useMemo(() => {
         if (!placeList) return [];
-        return [...placeList].sort((a, b) => getCategoryLevel(a.category) - getCategoryLevel(b.category));
-    }, [placeList]);
+        return [...placeList].sort((a, b) => {
+            const aCompleted = (progressMap[a.id] || 0) >= 2;
+            const bCompleted = (progressMap[b.id] || 0) >= 2;
+
+            const aStage = a.stage || 1;
+            const bStage = b.stage || 1;
+            const aLocked = aStage > currentStage;
+            const bLocked = bStage > currentStage;
+
+            if (aCompleted !== bCompleted) return aCompleted ? 1 : -1;
+            if (aLocked !== bLocked) return aLocked ? 1 : -1;
+            if (aStage !== bStage) return aStage - bStage;
+
+            return getCategoryLevel(a.category) - getCategoryLevel(b.category);
+        });
+    }, [placeList, progressMap, currentStage]);
 
     useEffect(() => {
         const handleResize = () => setVh(window.innerHeight);
@@ -149,8 +187,6 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
         window.addEventListener('pointermove', onPointerMove);
         window.addEventListener('pointerup', onPointerUp);
     };
-
-    const [progressMap, setProgressMap] = useState<Record<number, number>>({});
 
     useEffect(() => {
         const fetchProgress = async () => {
@@ -259,6 +295,47 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
                         const completedCount = progressMap[place.id] || 0;
                         const isCompleted = completedCount >= 2;
 
+                        const placeStage = place.stage || 1;
+                        const isLocked = placeStage > currentStage;
+
+                        // 잠긴 상태일 때 렌더링될 UI
+                        if (isLocked) {
+                            return (
+                                <article 
+                                    key={place.id}
+                                    className="quest-card"
+                                    onClick={() => alert(`이전 장소들의 미션을 먼저 모두 완료해 잠금을 해제하세요! 🗝️`)}
+                                    style={{ backgroundColor: '#F9FAFB', border: '1px solid #E5E7EB', cursor: 'pointer' }}
+                                >
+                                    <div className="quest-card-img-box" style={{ filter: 'grayscale(100%)', opacity: 0.5, position: 'relative' }}>
+                                        <img src={place.imgUrl || '/placeholder.jpg'} alt={place.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.3)' }}>
+                                            <Lock color="white" size={24} />
+                                        </div>
+                                    </div>
+
+                                    <div className="quest-card-info" style={{ opacity: 0.6 }}>
+                                        <div className="quest-badge" style={{ backgroundColor: '#E5E7EB', color: '#6B7280' }}>
+                                            🔒 STAGE {placeStage} - {categoryName}
+                                        </div>
+                                        
+                                        <div className="quest-titles">
+                                            <h3 className="quest-name" style={{ color: '#9CA3AF' }}>{place.name}</h3>
+                                        </div>
+                                        
+                                        <div className="quest-stamp-status" style={{ color: '#6B7280', fontWeight: '500' }}>
+                                            이전 단계를 모두 클리어하세요
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="quest-arrow">
+                                        <Lock size={20} color="#D1D5DB" />
+                                    </div>
+                                </article>
+                            );
+                        }
+
+                        // 열려 있는 상태일 때 렌더링될 UI
                         return (
                             <Link key={place.id} href={`${basePath}/${place.id}`} className="quest-card-link">
                                 <article 
@@ -281,9 +358,9 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
                                         <div className="quest-badge" 
                                              style={{ 
                                                  backgroundColor: isCompleted ? '#F3F4F6' : '', 
-                                                 color: isCompleted ? '#6B7280' : '' 
+                                                 color: isCompleted ? '#6B7280' : '#10B981' 
                                              }}>
-                                            LV {level}. {categoryName}
+                                            STAGE {placeStage} - {categoryName}
                                         </div>
                                         
                                         <div className="quest-titles">
@@ -335,19 +412,6 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
                             </Link>
                         );
                     })}
-
-                    <article className="quest-card locked">
-                        <div className="quest-card-img-box locked-box">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="#D1D5DB" strokeWidth="2" width="28" height="28">
-                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                                <circle cx="12" cy="10" r="3"></circle>
-                            </svg>
-                        </div>
-                        <div className="quest-card-info">
-                            <h3 className="quest-name locked-text">잠긴 장소...</h3>
-                            <div className="quest-stamp-status locked-subtext">추후 업로드 예정</div>
-                        </div>
-                    </article>
                 </div>
             </div>
         </div>

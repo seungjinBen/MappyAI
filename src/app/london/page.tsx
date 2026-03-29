@@ -19,6 +19,7 @@ interface Place {
   name: string;
   imgUrl?: string; 
   cityId?: number;
+  stage?: number;
 }
 
 interface Conversation {
@@ -30,7 +31,7 @@ interface Conversation {
   isSaved?: boolean;
 }
 
-const TARGET_IDS = [55,56,58,59,61,62,63,64,70,71,75,76,78,79,81,82];
+const TARGET_IDS = [55,56,58,59,61,62,63,64,70,71,75,78,79,82];
 const GMAPS_LIBRARIES: ("places" | "geometry" | "drawing" | "visualization")[] = ['places'];
 const DEFAULT_CENTER = { lat: 51.5148, lng: -0.1090 };
 const DEFAULT_ZOOM = 13;
@@ -57,9 +58,20 @@ export default function LondonPage() {
     libraries: GMAPS_LIBRARIES,
   });
 
+  const [clearedPlaceIds, setClearedPlaceIds] = useState<number[]>([]);
+
+  // 1. 클리어한 미션 데이터 로딩
   useEffect(() => {
-    const timer = setTimeout(() => setShowBottomList(true), 300);
-    return () => clearTimeout(timer);
+    try {
+      const progressData = JSON.parse(localStorage.getItem('mappy_progress') || '{}');
+      const londonCleared = Object.keys(progressData)
+        .map(Number)
+        .filter(id => TARGET_IDS.includes(id) && progressData[id].length > 0);
+      
+      setClearedPlaceIds(londonCleared);
+    } catch (e) {
+      console.error("진행도 로드 실패:", e);
+    }
   }, []);
 
   const filteredPlaces = useMemo(() => {
@@ -68,7 +80,31 @@ export default function LondonPage() {
     );
   }, [placeList]);
 
-  // 최적화 1: 처음 로딩될 때의 중심점과 줌 레벨을 '고정값'으로 계산
+  const currentStage = useMemo(() => {
+    if (filteredPlaces.length === 0) return 1;
+
+    let stageToUnlock = 1;
+    const maxStage = Math.max(...filteredPlaces.map(p => p.stage || 1), 1);
+
+    for (let s = 1; s < maxStage; s++) {
+      const placesInThisStage = filteredPlaces.filter(p => (p.stage || 1) === s);
+      const isAllCleared = placesInThisStage.every(p => clearedPlaceIds.includes(p.id));
+
+      if (isAllCleared) {
+        stageToUnlock = s + 1;
+      } else {
+        break; 
+      }
+    }
+    
+    return stageToUnlock;
+  }, [filteredPlaces, clearedPlaceIds]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowBottomList(true), 300);
+    return () => clearTimeout(timer);
+  }, []);
+
   const initialCenter = useMemo(() => {
     if (id && placeList.length > 0) {
       const target = placeList.find(p => p.id === Number(id));
@@ -100,10 +136,13 @@ export default function LondonPage() {
     }
   }, []);
 
-  const handleMarkerClick = useCallback((p: Place) => {
+  const handleMarkerClick = useCallback((p: Place, isLocked: boolean) => {
+    if (isLocked) {
+      alert(`이전 장소들의 미션을 먼저 모두 완료해 잠금을 해제하세요! 🗝️`);
+      return;
+    }
     setSelectedPlace(p);
     panTo(p.lat, p.lng);
-    // 최적화 2: Next.js 라우터 이동 시 스크롤 점프를 막고 부드럽게 넘김
     router.push(`/london/${p.id}`, { scroll: false });
     setOpen(true);
   }, [router, panTo]);
@@ -115,40 +154,52 @@ export default function LondonPage() {
     setOpen(false);
   }, [router, panTo]);
 
-  // 최적화 3: 커스텀 마커들을 useMemo로 묶어서 불필요한 재렌더링을 완벽 차단
   const renderMarkers = useMemo(() => {
-    return filteredPlaces.map((p) => (
-      <OverlayView
-        key={p.id}
-        position={{ lat: p.lat, lng: p.lng }}
-        mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-        // 마커의 위치를 정확히 핀포인트에 맞추기 위한 오프셋 설정
-        getPixelPositionOffset={(width, height) => ({
-          x: -(width / 2),
-          y: -(height / 2),
-        })}
-      >
-        <div
-          className="custom-marker-container"
-          onClick={(e) => {
-            e.stopPropagation();
-            handleMarkerClick(p);
-          }}
+    return filteredPlaces.map((p) => {
+      
+      const isCleared = clearedPlaceIds.includes(p.id);
+      const placeStage = p.stage || 1; 
+      
+      // 내 현재 해금 레벨보다 장소 요구 레벨이 높으면 잠김!
+      const isLocked = placeStage > currentStage; 
+
+      let markerClass = "custom-marker-container";
+      if (isLocked) markerClass += " locked";
+      else if (isCleared) markerClass += " cleared";
+
+      return (
+        <OverlayView
+          key={p.id}
+          position={{ lat: p.lat, lng: p.lng }}
+          mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+          getPixelPositionOffset={(width, height) => ({
+            x: -(width / 2),
+            y: -(height / 2),
+          })}
         >
-          <div className={`marker-photo-circle ${selectedPlace?.id === p.id ? 'active' : ''}`}>
-            <img
-              src={p.imgUrl || "/api/placeholder/100/100"}
-              alt={p.name}
-              loading="lazy"
-            />
+          <div
+            className={markerClass}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleMarkerClick(p, isLocked);
+            }}
+          >
+
+            <div className={`marker-photo-circle ${selectedPlace?.id === p.id ? 'active' : ''}`}>
+              <img
+                src={p.imgUrl || "/api/placeholder/100/100"}
+                alt={p.name}
+                loading="lazy"
+              />
+            </div>
+            <div className="marker-name-tag">
+              {p.name.split('(')[0].trim()}
+            </div>
           </div>
-          <div className="marker-name-tag">
-            {p.name.split('(')[0].trim()}
-          </div>
-        </div>
-      </OverlayView>
-    ));
-  }, [filteredPlaces, selectedPlace?.id, handleMarkerClick]);
+        </OverlayView>
+      );
+    });
+  }, [filteredPlaces, selectedPlace?.id, handleMarkerClick, clearedPlaceIds, currentStage]);
 
   if (loadError) return <div className="p-10">지도를 불러오지 못했습니다.</div>;
   if (!isLoaded || loading) return <div className="p-10">런던으로 여행을 떠나는 중...</div>;
