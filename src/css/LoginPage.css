@@ -82,6 +82,14 @@
     box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
 }
 
+.login-input[type="password"] {
+    font-family: sans-serif; 
+    letter-spacing: 2px; 
+    -webkit-text-security: disc;
+    color-scheme: light; 
+    color: #000000; 
+}
+
 /* 메인 버튼 */
 .login-btn {
     width: 100%;

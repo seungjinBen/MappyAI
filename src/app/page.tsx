@@ -47,6 +47,11 @@ export default function PostMain() {
     const [onboardingInput, setOnboardingInput] = useState('');
     const [onboardingResult, setOnboardingResult] = useState<{ score: number, feedback: string } | null>(null);
 
+    const closePermissionModal = useCallback(() => {
+        setShowPermissionModal(false);
+        sessionStorage.setItem('mappy_mic_modal_closed', 'true');
+    }, []);
+
     // 초기 진입 로직 수정
     useEffect(() => {
         const { isInApp, isAndroid } = checkInAppBrowser();
@@ -58,6 +63,7 @@ export default function PostMain() {
         }
 
         const checkMicPermission = async () => {
+            if (sessionStorage.getItem('mappy_mic_modal_closed')) return;
             try {
                 if (navigator.permissions && navigator.permissions.query) {
                     const result = await navigator.permissions.query({ name: 'microphone' as PermissionName });
@@ -114,7 +120,7 @@ export default function PostMain() {
     const completeOnboarding = () => {
         localStorage.setItem('mappy_onboarding_done', 'true');
         setShowOnboarding(false);
-        setTimeout(() => setShowPermissionModal(true), 500); 
+        setTimeout(() => setShowPermissionModal(true), 500);
     };
 
     const handlePermissionConfirm = async () => {
@@ -123,10 +129,10 @@ export default function PostMain() {
             unlockAudio.play().catch(() => {});
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             stream.getTracks().forEach(track => track.stop());
-            setShowPermissionModal(false);
+            closePermissionModal();
         } catch (err) {
             alert("마이크 권한이 거부되었습니다. 설정에서 마이크를 허용해주셔야 원활한 이용이 가능합니다!");
-            setShowPermissionModal(false);
+            closePermissionModal();
         }
     };
 
@@ -330,7 +336,7 @@ export default function PostMain() {
             {showPermissionModal && (
                 <PermissionModal 
                     onConfirm={handlePermissionConfirm} 
-                    onClose={() => setShowPermissionModal(false)} 
+                    onClose={closePermissionModal}
                 />
             )}
             <style dangerouslySetInnerHTML={{__html: `

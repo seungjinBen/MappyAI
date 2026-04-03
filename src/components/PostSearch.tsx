@@ -164,7 +164,6 @@ const handleSearch = async (query: string = searchText) => {
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
                 onKeyDown={handleKeyDown}
-                autoFocus
             />
             {searchText.length > 0 && (
                 <button className="input-clear-btn" onClick={handleClearInput}>
