@@ -143,13 +143,13 @@ export default function EdinburghPage() {
     }
     setSelectedPlace(p);
     panTo(p.lat, p.lng);
-    router.push(`/london/${p.id}`, { scroll: false });
+    router.push(`/edinburgh/${p.id}`, { scroll: false });
     setOpen(true);
   }, [router, panTo]);
 
   const handleMapClick = useCallback(() => {
     setSelectedPlace(null);
-    router.push('/london', { scroll: false });
+    router.push('/edinburgh', { scroll: false });
     panTo(DEFAULT_CENTER.lat, DEFAULT_CENTER.lng, DEFAULT_ZOOM);
     setOpen(false);
   }, [router, panTo]);
@@ -242,7 +242,11 @@ export default function EdinburghPage() {
                   open={open}
                   onOpen={() => setOpen(true)}
                   onClose={() => setOpen(false)}
-                  title="에든버러의 대표 장소"
+                  title={
+                    <div className="sheet-title-wrapper">
+                      에든버러 <span className="sheet-title-en">Edinburgh</span>
+                    </div>
+                  }
                   peekHeight="32vh"
                   halfHeight="50vh"
                   fullHeight="90vh"

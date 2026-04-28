@@ -59,6 +59,8 @@ export default function ChatQuestPage() {
     const [hintText, setHintText] = useState<string | null>(null);
 
     const [completedCount, setCompletedCount] = useState<number>(0);
+    // 미션 완료 기준 (기존 2개 → 현재 1개. 서비스 확장 시 2로 되돌리면 됨)
+    const MISSIONS_TO_COMPLETE = 1;
     const [journalText, setJournalText] = useState<string>('');
 
     const [inputMode, setInputMode] = useState<'voice' | 'text'>('voice');
@@ -451,8 +453,12 @@ export default function ChatQuestPage() {
         return (
             <div className="completion-wrapper">
                 <div className="completion-header">
-                    <h1 className="completion-main-title">QUEST COMPLETE!</h1>
-                    <p className="completion-sub-title">나만의 여행 엽서가 도착했습니다 ✈️</p>
+                    <p className="completion-saved-text">여행 기억 저장됨</p>
+                    <h1 className="story-main-title">
+                        {cityName}에서의<br />
+                        <span className="story-highlight">한 장면</span>
+                    </h1>
+                    <p className="story-sub-title">이 대화가 당신의 여행이 됩니다</p>
                 </div>
                 <div className="postcard-card">
                     <div className="postcard-img-area">
@@ -466,14 +472,14 @@ export default function ChatQuestPage() {
                         <div className="postcard-place-info">
                             <MapPin size={18} /> <span>{place?.name}에서</span>
                         </div>
-                        {completedCount < 2 ? (
+                        {completedCount < MISSIONS_TO_COMPLETE ? (
                             <div className="postcard-locked-wrapper">
                                 <div className="postcard-text-area postcard-blur-text">
                                     {defaultPlaceholder}
                                 </div>
                                 <div className="postcard-lock-overlay">
                                     <div className="lock-badge">
-                                        <Lock size={15} /> 미션 1개 더 완료 시 기록 작성 가능!
+                                        <Lock size={15} /> 미션 {MISSIONS_TO_COMPLETE}개 완료 시 기록 작성 가능!
                                     </div>
                                 </div>
                             </div>
@@ -488,13 +494,13 @@ export default function ChatQuestPage() {
                     </div>
                 </div>
                 <div className="completion-actions">
-                    {completedCount >= 2 ? (
+                    {completedCount >= MISSIONS_TO_COMPLETE ? (
                         <button className="btn-primary" onClick={handleShare}>
                             <Share2 size={20} /> 여행 기록 공유하기
                         </button>
                     ) : (
                         <button className="btn-primary" onClick={() => router.back()}>
-                            ✨ 1개 더 완료하고 엽서 기록 열기
+                            ✨ {MISSIONS_TO_COMPLETE}개 더 완료하고 엽서 기록 열기
                         </button>
                     )}
                     <button className="btn-secondary" onClick={() => router.push(getCityBasePath(place?.cityId || place?.city_id))}>
@@ -512,7 +518,7 @@ export default function ChatQuestPage() {
                     <X size={24} color="#9CA3AF" />
                 </button>
                 <div className="step-indicator">
-                    {totalSteps > 0 ? `STEP ${Math.min(currentIndex + 1, totalSteps)} / ${totalSteps}` : 'READY'}
+                    {totalSteps > 0 ? `${place?.name || 'STEP'} · ${Math.min(currentIndex + 1, totalSteps)} / ${totalSteps}` : 'STEP'}
                 </div>
                 
                 <div className="header-right-action">
@@ -550,7 +556,7 @@ export default function ChatQuestPage() {
 
                 {!isMissionComplete && currentLine?.isMe && !showModal && (
                     <div className="mission-card">
-                        <div className="mission-label">MISSION OBJECTIVE</div>
+                        <div className="mission-label">이렇게 이어가보세요</div>
                         <h3 className="mission-title">{currentLine.koreanText}</h3>
 
                         {hintLevel === 0 && (
@@ -625,7 +631,7 @@ export default function ChatQuestPage() {
                 
                 {isMissionComplete && totalSteps > 0 && (
                     <div className="mission-complete-card">
-                        🎉 모든 회화 미션을 완료했습니다! 하단 버튼을 눌러주세요.
+                        🎉 완벽해요! 이제 이 장소가 익숙해졌을 거예요.
                     </div>
                 )}
                 
@@ -691,7 +697,7 @@ export default function ChatQuestPage() {
                         </button>
                         
                         <p className="mic-instruction">
-                            {isMissionComplete ? "대화를 복습하고 다음으로 넘어가세요" : 
+                            {isMissionComplete ? "오늘의 대화를 기억하고 다음 장소로" : 
                              isRecording ? "듣고 있습니다..." : 
                              (currentLine?.isMe ? "마이크를 눌러 영어로 말해보세요" : "상대방의 말을 들어보세요")}
                         </p>

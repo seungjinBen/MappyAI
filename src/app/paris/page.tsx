@@ -242,7 +242,11 @@ export default function ParisPage() {
                   open={open}
                   onOpen={() => setOpen(true)}
                   onClose={() => setOpen(false)}
-                  title="파리의 대표 장소"
+                  title={
+                    <div className="sheet-title-wrapper">
+                      파리 <span className="sheet-title-en">Paris</span>
+                    </div>
+                  }
                   peekHeight="32vh"
                   halfHeight="50vh"
                   fullHeight="90vh"

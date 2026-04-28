@@ -132,10 +132,10 @@ export default function SavedCardsPage() {
         <div className="my-card-page">
             <header className="my-header">
                 <div className="header-top">
-                    <h1 className="page-title">나의 노트</h1>
+                    <h1 className="page-title">나의 여행 문장</h1>
                     <span className="save-count">{savedList.length}개 저장됨</span>
                 </div>
-                <p className="header-desc">여행 중 저장한 표현을 오프라인에서도 확인하세요.</p>
+                <p className="header-desc">이 표현들이 당신의 유럽을 만들었어요.</p>
             </header>
 
             <main className="card-list-container">

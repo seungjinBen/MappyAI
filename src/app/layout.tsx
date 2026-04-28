@@ -8,22 +8,53 @@ import { DataProvider } from '@/context/DataContext';
 import MainLayout from '@/components/Layout/MainLayout';
 
 export const metadata: Metadata = {
-  title: "Mappy English | 지도로 배우는 유럽 여행 영어 회화",
-  description: "유럽 여행, 이제 겁내지 마세요! 장소별 미션으로 배우는 실전 여행 영어 서비스, Mappy English.",
-  keywords: ["유럽여행", "여행영어", "영어회화", "실전영어", "Mappy English"],
+  title: "Mappy English | 유럽 여행 전, 설레는 영어 준비",
+  description:
+    "파리 카페에서 주문하고, 런던 거리에서 길을 묻고, 에든버러에서 현지인과 대화하세요. " +
+    "지도를 탐험하며 그 장소에서 꼭 필요한 영어를 — 공부가 아닌 설렘으로 미리 경험합니다.",
+  keywords: [
+    "유럽여행 영어",
+    "여행 영어 회화",
+    "파리 영어",
+    "런던 영어",
+    "실전 여행 영어",
+    "여행 영어 앱",
+    "상황별 영어 회화",
+    "Mappy English",
+    "여행 준비 영어",
+    "현지 영어 회화",
+  ],
   verification: {
     other: {
       "naver-site-verification": "b60a2b0dc8e484d381da866f6c204b1207b1a801",
     },
   },
-  
+
   openGraph: {
-    title: "Mappy English - 나만의 여행 영어 지도",
-    description: "지도 위의 장소를 클릭하고 실전 회화 미션을 완료하세요!",
+    title: "Mappy English — 내 손안의 작은 유럽",
+    description:
+      "에펠탑 앞에서, 런던 카페에서, 에든버러 로얄마일에서. " +
+      "지도를 클릭하면 그 장소에서 실제로 쓰는 영어 대화가 시작됩니다.",
     url: "https://mappyenglish.com",
     siteName: "Mappy English",
-    images: ["/MappyLogo.png"], 
+    images: [
+      {
+        url: "/MappyLogo.png",
+        width: 1200,
+        height: 630,
+        alt: "Mappy English — 유럽 지도로 배우는 여행 영어",
+      },
+    ],
     type: "website",
+    locale: "ko_KR",
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: "Mappy English — 내 손안의 작은 유럽",
+    description:
+      "파리 카페 주문부터 런던 길 묻기까지. 지도를 탐험하며 여행 영어를 미리 경험하세요.",
+    images: ["/MappyLogo.png"],
   },
 };
 

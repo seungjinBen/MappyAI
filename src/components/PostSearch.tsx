@@ -160,7 +160,7 @@ const handleSearch = async (query: string = searchText) => {
             <Search size={20} color="#9CA3AF" />
             <input
                 type="text"
-                placeholder="상황이나 장소를 검색하세요"
+                placeholder="장소나 대화 상황을 검색해보세요"
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
                 onKeyDown={handleKeyDown}

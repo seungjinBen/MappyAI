@@ -18,6 +18,8 @@ interface Place {
     lng: number;
     name: string;
     imgUrl?: string;
+    stage?: number;
+    englishText?: string;
 }
 
 const apiKey = process.env.NEXT_PUBLIC_GMAPS_KEY as string;
@@ -149,10 +151,10 @@ export default function PostMain() {
 
     const cityList = useMemo<Place[]>(() => {
         const nameUpdates: Record<number, string> = {
-            52: "파리의 에펠탑",
-            64: "런던의 빅 벤",
-            96: "니스의 캐슬힐 전망대",
-            108: "에든버러의 로얄 마일"
+            52: "파리",
+            64: "런던",
+            96: "니스",
+            108: "에든버러"
         };
 
         const targetIds = Object.keys(nameUpdates).map(Number);
@@ -236,7 +238,7 @@ export default function PostMain() {
                                 open={open}
                                 onOpen={() => setOpen(true)}
                                 onClose={() => setOpen(false)}
-                                title="각 도시의 대표장소"
+                                title="어디로 떠날까요?"
                                 peekHeight='32vh'
                                 halfHeight='50vh'
                                 fullHeight='91vh'
@@ -261,10 +263,10 @@ export default function PostMain() {
                                 <div style={{ textAlign: 'center' }}>
                                     <div style={{ fontSize: '32px', marginBottom: '12px' }}>☕️</div>
                                     <h2 style={{ fontSize: '20px', fontWeight: '800', color: '#111827', margin: '0 0 8px 0', lineHeight: '1.4' }}>
-                                        파파고 없이 현지 카페에서<br/>커피를 주문할 수 있나요?
+                                        파리 카페에서 이 한 마디, <br/> 말할 수 있어요? 
                                     </h2>
                                     <p style={{ color: '#6B7280', fontSize: '14px', margin: 0, lineHeight: '1.5' }}>
-                                        AI 선생님과 함께 1분 맛보기 미션을 풀어보세요!
+                                        1분이면 충분해요. 실제 상황으로 바로 체험해보세요!
                                     </p>
                                 </div>
                                 
@@ -278,7 +280,7 @@ export default function PostMain() {
                                         type="text" 
                                         value={onboardingInput}
                                         onChange={(e) => setOnboardingInput(e.target.value)}
-                                        placeholder="이 문장을 영어로 적어보세요!"
+                                        placeholder="영어로 어떻게 말할까요?"
                                         onKeyDown={(e) => e.key === 'Enter' && handleOnboardingSubmit()}
                                         style={{ flex: 1, padding: '14px 16px', borderRadius: '12px', border: '1px solid #E5E7EB', outline: 'none', fontSize: '15px' }}
                                     />
@@ -309,14 +311,14 @@ export default function PostMain() {
                                 </h2>
                                 <p style={{ color: '#4B5563', fontSize: '15px', lineHeight: '1.5', margin: '0 0 24px 0', wordBreak: 'keep-all' }}>
                                    [ AI 피드백: {onboardingResult.feedback} ] <br/><br/>
-                                    <strong>미션을 깨고 해당 장소의 스탬프를 획득하세요!</strong>
+                                    <strong>이 표현, 실제 카페에서 써먹을 수 있어요.</strong>
                                 </p>
 
                                 <button 
                                     onClick={completeOnboarding}
                                     style={{ width: '100%', padding: '16px', backgroundColor: '#111827', color: 'white', border: 'none', borderRadius: '12px', fontSize: '16px', fontWeight: '700', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
                                 >
-                                    <MapPin size={20} /> 지도로 가서 미션 시작하기
+                                    <MapPin size={20} /> 지금 파리 지도 탐험하기
                                 </button>
                                 
                                 <button 
@@ -326,7 +328,7 @@ export default function PostMain() {
                                     }}
                                     style={{ background: 'none', border: 'none', color: '#9CA3AF', fontSize: '13px', marginTop: '16px', cursor: 'pointer', textDecoration: 'underline' }}
                                 >
-                                    일단 눈으로만 둘러볼게요
+                                    먼저 어떤 곳인지 둘러볼게요
                                 </button>
                             </div>
                         )}

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { ChevronLeft, ChevronRight, ArrowLeft, CloudRain, X, Check } from 'lucide-react'; // 🌟 Check 아이콘 추가
+import { ChevronLeft, ChevronRight, ArrowLeft, X, Check } from 'lucide-react';
 import api from '@/lib/axios';
 import '@/css/PlaceDetail.css';
 
@@ -19,23 +19,32 @@ interface PlaceData {
     weatherInfo?: string;
 }
 
-interface Conversation {
-    id: number;
-    category?: string; 
+interface Line {
+    lineOrder: number;
+    englishText: string;
+    koreanText?: string;
 }
 
-export default function LondonPlaceDetailPage() {
+interface Conversation {
+    id: number;
+    category?: string;
+    type?: 'A' | 'B' | string;
+    lines?: Line[];
+}
+
+export default function ParisPlaceDetailPage() {
     const router = useRouter();
     const params = useParams();
     const id = params?.id;
 
     const [place, setPlace] = useState<PlaceData | null>(null);
     const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
-    const [conversations, setConversations] = useState<Conversation[]>([]); 
-    
-    // 해당 장소에서 완료한 대화들의 ID를 담아둘 상태 추가
+    const [conversations, setConversations] = useState<Conversation[]>([]);
+    const [targetConv, setTargetConv] = useState<Conversation | null>(null);
+    const [targetConvStep, setTargetConvStep] = useState(0);
+
     const [completedConvs, setCompletedConvs] = useState<number[]>([]);
-    
+
     const [currentIdx, setCurrentIdx] = useState(0);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
@@ -50,15 +59,24 @@ export default function LondonPlaceDetailPage() {
                     api.get(`/media/${id}`).catch(() => ({ data: null })),
                     api.get(`/conversations/place/${id}`).catch(() => ({ data: [] }))
                 ]);
-                
-                setPlace(placeRes.data);
-                
+
+                const placeData: PlaceData = placeRes.data;
+                setPlace(placeData);
+
                 const combined = [
                     ...(mediaRes.data?.images ?? []).map((src: string) => ({ type: "image", src })),
                     ...(mediaRes.data?.videos ?? []).map((src: string) => ({ type: "video", src }))
                 ];
                 setMediaItems(combined.length > 0 ? combined : [{ type: "image", src: "/placeholder.jpg" }]);
-                setConversations(convRes.data || []);
+
+                const convList: Conversation[] = convRes.data || [];
+                setConversations(convList);
+
+                const targetId = placeData.id * 2 - 1;
+                const foundIdx = convList.findIndex(c => c.id === targetId);
+                const resolvedIdx = foundIdx >= 0 ? foundIdx : 0;
+                setTargetConvStep(resolvedIdx);
+                setTargetConv(convList[resolvedIdx] ?? null);
             } catch (e) {
                 console.error(e);
             } finally {
@@ -68,7 +86,6 @@ export default function LondonPlaceDetailPage() {
         fetchData();
     }, [id]);
 
-    // 모달이 열릴 때 로컬 스토리지에서 완료한 미션 ID 목록을 꺼냄
     useEffect(() => {
         if (showModal && place) {
             try {
@@ -89,8 +106,8 @@ export default function LondonPlaceDetailPage() {
         if (mediaItems.length > 0) setCurrentIdx((prev) => (prev - 1 + mediaItems.length) % mediaItems.length);
     }, [mediaItems.length]);
 
-    const handleStartChat = (stepIndex: number) => {
-        router.push(`/chat/${place?.id}?step=${stepIndex}`);
+    const handleStartChat = () => {
+        router.push(`/chat/${place?.id}?step=${targetConvStep}`);
     };
 
     if (loading || !place) return <div className="loading-screen">정보를 가져오는 중...</div>;
@@ -103,31 +120,30 @@ export default function LondonPlaceDetailPage() {
                         <button className="modal-close-btn" onClick={() => setShowModal(false)}>
                             <X size={26} color="#9CA3AF" />
                         </button>
-                        
+
                         <h2 className="modal-title">어떤 대화를 연습할까요?</h2>
                         <p className="modal-subtitle">원하는 상황을 선택해 미션을 시작하세요.</p>
-                        
+
                         <div className="mission-list">
                             {conversations.length > 0 ? (
                                 conversations.map((conv, index) => {
                                     const categoryText = conv.category || "기본 회화 연습하기";
-                                    const lines = categoryText.split(','); 
-                                    
-                                    // 현재 대화(conv.id)가 완료 목록에 들어있는지 확인!
+                                    const lines = categoryText.split(',');
+
                                     const isCompleted = completedConvs.includes(conv.id);
 
                                     return (
-                                        <div 
-                                            key={conv.id} 
-                                            className="mission-list-item" 
-                                            onClick={() => handleStartChat(index)}
+                                        <div
+                                            key={conv.id}
+                                            className="mission-list-item"
+                                            onClick={() => handleStartChat()}
                                             style={{
                                                 backgroundColor: isCompleted ? '#F9FAFB' : '#FFFFFF',
                                                 opacity: isCompleted ? 0.6 : 1,
                                                 borderColor: isCompleted ? '#E5E7EB' : ''
                                             }}
                                         >
-                                            <div 
+                                            <div
                                                 className="mission-number"
                                                 style={{
                                                     backgroundColor: isCompleted ? '#D1D5DB' : '#10B981',
@@ -139,8 +155,8 @@ export default function LondonPlaceDetailPage() {
 
                                             <div className="mission-text-box">
                                                 {lines.map((textLine, i) => (
-                                                    <div 
-                                                        key={i} 
+                                                    <div
+                                                        key={i}
                                                         className="mission-text-line"
                                                         style={{ color: isCompleted ? '#9CA3AF' : '#1F2937'}}
                                                     >
@@ -163,7 +179,7 @@ export default function LondonPlaceDetailPage() {
 
             <div className="visual-section">
                 <img src={mediaItems[currentIdx]?.src} alt={place.name} className="main-bg-image" />
-                
+
                 <button className="circular-back-btn" onClick={() => router.back()}>
                     <ArrowLeft size={24} color="#fff" />
                 </button>
@@ -185,10 +201,38 @@ export default function LondonPlaceDetailPage() {
                     <h1 className="main-title-text-large">{place.name}</h1>
                     <p className="location-text-below-bold">Paris, France</p>
                     <p className="description-text-gray-large">{place.description}</p>
+
+                    {targetConv?.lines && targetConv.lines.length > 0 && (() => {
+                        const sorted = [...targetConv.lines].sort((a, b) => a.lineOrder - b.lineOrder);
+                        const preview = sorted.slice(0, 2);
+                        const isTypeA = String(targetConv.type).toUpperCase() === 'A';
+                        const getIsMe = (lineOrder: number) =>
+                            isTypeA ? lineOrder % 2 === 1 : lineOrder % 2 === 0;
+                        const remaining = targetConv.lines.length - 2;
+
+                        return (
+                            <div className="conv-preview-box">
+                                <p className="conv-preview-label">✦ {targetConv.category || "기본 회화 연습하기"}</p>
+                                {preview.map(line => {
+                                    const isMe = getIsMe(line.lineOrder);
+                                    return (
+                                        <div key={line.lineOrder} className={`conv-preview-row ${isMe ? 'me' : 'other'}`}>
+                                            <div className={`conv-preview-bubble ${isMe ? 'bubble-me' : 'bubble-other'}`}>
+                                                {line.englishText}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                                {remaining > 0 && (
+                                    <p className="conv-preview-more">+ {remaining}개의 대화가 더 있어요</p>
+                                )}
+                            </div>
+                        );
+                    })()}
                 </div>
 
-                <button className="cta-action-btn" onClick={() => setShowModal(true)}>
-                    대화 시작하기 <ChevronRight size={24} />
+                <button className="cta-action-btn" onClick={handleStartChat}>
+                    이 대화 경험하기 <ChevronRight size={24} />
                 </button>
             </div>
         </div>

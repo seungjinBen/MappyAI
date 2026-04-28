@@ -12,11 +12,11 @@ const getCityName = (id: number) => {
     const nice = [83, 84, 88, 89, 91, 93, 94, 95, 96, 97];
     const edinburgh = [102, 103, 105, 106, 108, 111, 114, 115, 116, 118];
 
-    if (paris.includes(id)) return 'PARIS';
-    if (london.includes(id)) return 'LONDON';
-    if (nice.includes(id)) return 'NICE';
-    if (edinburgh.includes(id)) return 'EDINBURGH';
-    return 'UNKNOWN CITY';
+    if (paris.includes(id)) return '파리';
+    if (london.includes(id)) return '런던';
+    if (nice.includes(id)) return '니스';
+    if (edinburgh.includes(id)) return '에든버러';
+    return '유럽';
 };
 
 function ShareLogic() {
@@ -56,12 +56,16 @@ return (
             backgroundSize: '20px 20px'
         }}>
             
-            <div style={{ textAlign: 'center', marginBottom: '24px', animation: 'fadeInDown 0.8s ease' }}>
-                <h1 style={{ fontSize: '22px', fontWeight: '900', color: '#374151', letterSpacing: '2px', margin: 0 }}>
-                    A TRAVELER'S POSTCARD
+            <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+                <p style={{ fontSize: '14px', color: '#10B981', marginBottom: '8px', fontWeight: '500' }}>
+                    여행 기억이 도착했어요
+                </p>
+                <h1 style={{ fontSize: '28px', fontWeight: '800', color: '#111827', lineHeight: '1.3', margin: '0', letterSpacing: '-0.5px' }}>
+                    {cityName}에서의<br />
+                    <span style={{ color: '#10B981', fontSize: '34px' }}>한 장면</span>
                 </h1>
-                <p style={{ color: '#6B7280', fontSize: '13px', marginTop: '8px' }}>
-                    누군가의 여행 기록이 담긴 엽서가 도착했습니다 ✈️
+                <p style={{ fontSize: '16px', color: '#6B7280', fontWeight: '500', marginTop: '12px', marginBottom: '0', letterSpacing: '-0.3px' }}>
+                    이 대화가 누군가의 여행이 됐습니다
                 </p>
             </div>
             
@@ -117,7 +121,7 @@ return (
                         
                         <div style={{ position: 'absolute', inset: 0, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                             <span style={{ backgroundColor: '#111827', color: '#FFF', fontSize: '12px', fontWeight: 'bold', padding: '6px 14px', borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                <MessageSquare size={14} /> 대화 미션 잠김
+                                <MessageSquare size={14} /> 아직 방문 전인 장소예요
                             </span>
                         </div>
                     </div>
@@ -137,8 +141,25 @@ return (
                     onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
                 >
                     <PlaneTakeoff size={22} /> 
-                    영어 대화 연습하고 기록 남기기
+                    나도 Mappy로 여행 준비하기
                 </button>
+            </div>
+
+            <div style={{ marginTop: '40px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', marginBottom: '10px' }}>
+                <div style={{ fontSize: '14px', color: '#9CA3AF', lineHeight: '1.6', fontWeight: '500', letterSpacing: '-0.3px' }}>
+                    유럽 여행 전 이 장소에서 나눌 대화를<br />
+                    미리 경험해보세요
+                </div>
+
+                <div>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginBottom: '8px', color: '#9CA3AF', fontWeight: '700', fontSize: '15px' }}>
+                        <MapPin size={16} />
+                        <span>Mappy English</span>
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#A1A1AA', fontWeight: '400', letterSpacing: '-0.2px' }}>
+                        유럽 여행, 설레는 현지 대화부터 — mappyenglish.com
+                    </div>
+                </div>
             </div>
             
             <style jsx>{`

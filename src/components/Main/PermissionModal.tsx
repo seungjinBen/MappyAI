@@ -20,7 +20,7 @@ export default function PermissionModal({ onClose, onConfirm }: PermissionModalP
                 </div>
                 
                 <h3 style={{ fontSize: '18px', fontWeight: '800', margin: '20px 0 10px 0', color: '#111827' }}>
-                    어떻게 대화해볼까요?
+                    현지인처럼 말해볼까요?
                 </h3>
 
                 {isInApp ? (
@@ -35,8 +35,8 @@ export default function PermissionModal({ onClose, onConfirm }: PermissionModalP
                 ) : (
                     <div style={{ textAlign: 'center', marginBottom: '20px' }}>
                         <p className="permission-desc" style={{ fontSize: '15px', color: '#4B5563', lineHeight: '1.5', margin: 0 }}>
-                            Mappy English는 <strong>직접 타이핑</strong>하거나<br />
-                            <strong>목소리</strong>로 대화하며 미션을 수행할 수 있어요.
+                            실제 <strong>파리 카페</strong>에서 주문하듯,<br />
+                            <strong>목소리</strong>로 직접 말해보는 게 가장 빨라요.
                         </p>
                     </div>
                 )}
@@ -44,24 +44,24 @@ export default function PermissionModal({ onClose, onConfirm }: PermissionModalP
                 <div className="permission-guide-box" style={{ backgroundColor: '#F9FAFB', borderRadius: '12px', padding: '16px' }}>
                     <div className="guide-item" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                         <MessageSquare size={16} color="#10B981" />
-                        <span style={{ fontSize: '14px', color: '#374151' }}><strong>텍스트 모드:</strong> 조용한 곳에서도 자유롭게</span>
+                        <span style={{ fontSize: '14px', color: '#374151' }}><strong>타이핑 : </strong> 조용한 곳에서, 내 속도로</span>
                     </div>
                     <div className="guide-item" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <Sparkles size={16} color="#10B981" />
-                        <span style={{ fontSize: '14px', color: '#374151' }}><strong>보이스 모드:</strong> 실전 같은 스피킹 연습</span>
+                        <span style={{ fontSize: '14px', color: '#374151' }}><strong>말하기 :</strong> 에밀리가 실제로 들을게요</span>
                     </div>
                 </div>
 
                 <div className="permission-actions" style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '10px', width: '100%' }}>
                     <button className="permission-confirm-btn" onClick={onConfirm} style={{ padding: '14px', borderRadius: '12px', fontWeight: '700' }}>
-                        마이크 권한 허용하기
+                        목소리로 말해볼게요
                     </button>
                     <button 
                         className="permission-close-link" 
                         onClick={onClose} 
                         style={{ background: 'none', border: 'none', color: '#9CA3AF', fontSize: '14px', cursor: 'pointer', textDecoration: 'underline' }}
                     >
-                        일단 텍스트로만 해볼게요
+                        일단 타이핑으로 시작할게요
                     </button>
                 </div>
             </div>

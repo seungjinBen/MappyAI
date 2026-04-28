@@ -242,7 +242,11 @@ export default function NicePage() {
                   open={open}
                   onOpen={() => setOpen(true)}
                   onClose={() => setOpen(false)}
-                  title="니스의 대표 장소"
+                  title={
+                    <div className="sheet-title-wrapper">
+                      니스 <span className="sheet-title-en">Nice</span>
+                    </div>
+                  }
                   peekHeight="32vh"
                   halfHeight="50vh"
                   fullHeight="90vh"

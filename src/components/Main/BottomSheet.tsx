@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import Link from 'next/link';
 import api from '@/lib/axios';
-import { Lock } from 'lucide-react'; // 🌟 자물쇠 아이콘 추가
+import { Lock } from 'lucide-react';
 import '@/css/BottomSheet.css';
 import '@/css/PlaceCards.css';
 
@@ -16,15 +16,17 @@ interface Place {
   description?: string;
   category?: 'A' | 'B' | 'C' | 'D' | 'E';
   subName?: string;
-  stage?: number; // 🌟 stage 타입 추가
+  stage?: number;
+  englishText?: string;
 }
+
 
 interface BottomSheetProps {
   placeList: Place[];
   open?: boolean;
   onOpen?: () => void;
   onClose?: () => void;
-  title: string;
+  title: React.ReactNode;
   peekHeight: string | number;
   halfHeight: string | number;
   fullHeight: string | number;
@@ -66,6 +68,9 @@ const getCategoryLevel = (category?: string) => {
   }
 };
 
+// 미션 완료 기준 인원수 (기존 2개 → 현재 1개. 서비스 확장 시 2로 되돌리면 됨)
+const MISSIONS_TO_COMPLETE = 1;
+
 const BottomSheet: React.FC<BottomSheetProps> = ({
   placeList, open, onOpen, onClose, title, peekHeight, halfHeight, fullHeight
 }) => {
@@ -95,12 +100,12 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
         return stageToUnlock;
     }, [placeList, progressMap]);
 
-    // 정렬: 진행 중(미완료+열림) -> 잠김 -> 완료됨 순서로 
+    // 정렬: 진행 중(미완료+열림) -> 잠김 -> 완료됨 순서로
     const sortedPlaceList = useMemo(() => {
         if (!placeList) return [];
         return [...placeList].sort((a, b) => {
-            const aCompleted = (progressMap[a.id] || 0) >= 2;
-            const bCompleted = (progressMap[b.id] || 0) >= 2;
+            const aCompleted = (progressMap[a.id] || 0) >= MISSIONS_TO_COMPLETE;
+            const bCompleted = (progressMap[b.id] || 0) >= MISSIONS_TO_COMPLETE;
 
             const aStage = a.stage || 1;
             const bStage = b.stage || 1;
@@ -225,9 +230,8 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
 
     // 미션 진행률 계산
     const totalMissions = placeList?.length || 0;
-    const completedMissions = placeList?.filter(place => (progressMap[place.id] || 0) >= 2).length || 0;
+    const completedMissions = placeList?.filter(place => (progressMap[place.id] || 0) >= MISSIONS_TO_COMPLETE).length || 0;
     const progressPercent = totalMissions === 0 ? 0 : Math.round((completedMissions / totalMissions) * 100);
-
     return (
         <div
             ref={sheetRef}
@@ -262,12 +266,18 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
                 </div>
                 
                 <div className="quest-header-desc">
-                    지도를 탐험하며 숨겨진 미션을 완성해보세요!
+                    여기서 어떤 대화를 나눠볼까요?
                 </div>
 
                 <div className="city-progress-container" style={{ marginTop: '10px', padding: '0 4px', paddingBottom: '10px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                        <span style={{ fontSize: '13px', fontWeight: '700', color: '#4B5563' }}>미션 달성률</span>
+                        <span style={{ fontSize: '13px', fontWeight: '700', color: '#4B5563' }}>
+                            {totalMissions - completedMissions === 0 ? (
+                                <span style={{ color: '#10B981' }}>모든 장소를 방문했어요! 🎉</span>
+                            ) : (
+                                <>아직 <span style={{ color: '#10B981', fontSize: '14px', fontWeight: '800' }}>{totalMissions - completedMissions}곳</span>이 당신을 기다리고 있어요...</>
+                            )}
+                        </span>
                         <span style={{ fontSize: '14px', fontWeight: '800', color: '#10B981' }}>
                             {progressPercent}% <span style={{ fontSize: '12px', color: '#9CA3AF', fontWeight: '600', marginLeft: '2px' }}>({completedMissions}/{totalMissions})</span>
                         </span>
@@ -293,7 +303,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
                         const level = getCategoryLevel(place.category);
 
                         const completedCount = progressMap[place.id] || 0;
-                        const isCompleted = completedCount >= 2;
+                        const isCompleted = completedCount >= MISSIONS_TO_COMPLETE;
 
                         const placeStage = place.stage || 1;
                         const isLocked = placeStage > currentStage;
@@ -316,7 +326,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
 
                                     <div className="quest-card-info" style={{ opacity: 0.6 }}>
                                         <div className="quest-badge" style={{ backgroundColor: '#E5E7EB', color: '#6B7280' }}>
-                                            🔒 STAGE {placeStage} - {categoryName}
+                                            {categoryName}
                                         </div>
                                         
                                         <div className="quest-titles">
@@ -324,7 +334,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
                                         </div>
                                         
                                         <div className="quest-stamp-status" style={{ color: '#6B7280', fontWeight: '500' }}>
-                                            이전 단계를 모두 클리어하세요
+                                            앞 장소를 먼저 방문하면 열려요
                                         </div>
                                     </div>
                                     
@@ -360,7 +370,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
                                                  backgroundColor: isCompleted ? '#F3F4F6' : '', 
                                                  color: isCompleted ? '#6B7280' : '#10B981' 
                                              }}>
-                                            STAGE {placeStage} - {categoryName}
+                                            {categoryName}
                                         </div>
                                         
                                         <div className="quest-titles">
@@ -377,21 +387,25 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
                                         <div className="quest-stamp-status" 
                                              style={{ 
                                                  color: isCompleted ? '#10B981' : '#6B7280', 
-                                                 fontWeight: isCompleted ? '700' : '500' 
+                                                 fontWeight: isCompleted ? '500' : '500' 
                                              }}>
                                             {isCompleted ? (
                                                 <>
                                                     <svg viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="2.5" width="16" height="16">
                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                                     </svg>
-                                                    미션 완료!
+                                                    여기서의 대화, 기억됐어요
                                                 </>
                                             ) : (
                                                 <>
-                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
+                                                    <svg 
+                                                        className="conversation-preview-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"
+                                                    >
                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                                                     </svg>
-                                                    대화 미션 도전하기
+                                                    <span className="conversation-preview-text">
+                                                        {place.englishText ? `"${place.englishText}"` : '이 장소에서 대화 시작하기'}
+                                                    </span>
                                                 </>
                                             )}
                                         </div>
