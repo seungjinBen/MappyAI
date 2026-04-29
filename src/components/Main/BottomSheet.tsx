@@ -398,11 +398,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
                                                 </>
                                             ) : (
                                                 <>
-                                                    <svg 
-                                                        className="conversation-preview-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"
-                                                    >
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                                                    </svg>
+                                                    
                                                     <span className="conversation-preview-text">
                                                         {place.englishText ? `"${place.englishText}"` : '이 장소에서 대화 시작하기'}
                                                     </span>
