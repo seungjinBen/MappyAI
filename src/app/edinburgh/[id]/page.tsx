@@ -200,8 +200,10 @@ export default function LondonPlaceDetailPage() {
 
             <div className="info-bottom-sheet">
                 <div className="content-inner">
-                    <h1 className="main-title-text-large">{place.name}</h1>
-                    <p className="location-text-below-bold">Edinburgh, United Kingdom</p>
+                    <div className="place-title-row">
+                        <h1 className="main-title-text-large">{place.name}</h1>
+                        <span className="location-badge">Edinburgh · UK</span>
+                    </div>
                     <p className="description-text-gray-large">{place.description}</p>
 
                     {targetConv?.lines && targetConv.lines.length > 0 && (() => {

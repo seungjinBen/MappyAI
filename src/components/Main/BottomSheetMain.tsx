@@ -259,7 +259,7 @@ export default function BottomSheetMain({
                 </div>
 
                 {/* 파리 현지 시간 기반 장소 추천 */}
-                <div style={{ padding: '24px 10px 0' }}>
+                <div style={{ padding: '24px 20px 0' }}>
                     {/* 시간대 배지 */}
                     <div style={{
                         display: 'inline-flex', alignItems: 'center', gap: '6px',
@@ -279,7 +279,7 @@ export default function BottomSheetMain({
                     </p>
 
                     {/* 장소 카드 가로 스크롤 */}
-                    <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '8px', scrollbarWidth: 'none', marginLeft: '-10px', marginRight: '-10px', paddingLeft: '10px', paddingRight: '10px' }}>
+                    <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '8px', scrollbarWidth: 'none', marginLeft: '-20px', marginRight: '-20px', paddingLeft: '20px', paddingRight: '20px' }}>
                         {recommendedPlaces.map(place => (
                             <Link
                                 key={place.id}
@@ -313,14 +313,14 @@ export default function BottomSheetMain({
                 </div>
 
                 {/* 각 도시의 대표 장소 */}
-                <div style={{ padding: '24px 10px 80px' }}>
+                <div style={{ padding: '24px 20px 80px' }}>
                     <h3 style={{ fontSize: '20px', fontWeight: '800', color: '#111827', margin: '0 0 4px' }}>
                         각 도시의 대표 장소
                     </h3>
                     <p style={{ fontSize: '13px', color: '#9CA3AF', margin: '0 0 16px', lineHeight: '1.6' }}>
                         도시를 상징하는 명소에서 첫 회화를 시작해보세요
                     </p>
-                    <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '8px', scrollbarWidth: 'none', marginLeft: '-10px', marginRight: '-10px', paddingLeft: '10px', paddingRight: '10px' }}>
+                    <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '8px', scrollbarWidth: 'none', marginLeft: '-20px', marginRight: '-20px', paddingLeft: '20px', paddingRight: '20px' }}>
                         {placeList.map(city => {
                             const config = cityConfig[city.id] || { path: '/', label: '' };
                             const countryLabel = city.id === 52 || city.id === 96 ? '프랑스' : '영국';

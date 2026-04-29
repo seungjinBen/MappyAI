@@ -143,13 +143,13 @@ export default function ParisPage() {
     }
     setSelectedPlace(p);
     panTo(p.lat, p.lng);
-    router.push(`/london/${p.id}`, { scroll: false });
+    router.push(`/paris/${p.id}`, { scroll: false });
     setOpen(true);
   }, [router, panTo]);
 
   const handleMapClick = useCallback(() => {
     setSelectedPlace(null);
-    router.push('/london', { scroll: false });
+    router.push('/paris', { scroll: false });
     panTo(DEFAULT_CENTER.lat, DEFAULT_CENTER.lng, DEFAULT_ZOOM);
     setOpen(false);
   }, [router, panTo]);

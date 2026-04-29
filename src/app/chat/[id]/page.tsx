@@ -711,9 +711,9 @@ export default function ChatQuestPage() {
                             placeholder={isEvaluatingText ? "AI가 채점 중입니다..." : "영어로 문장을 입력해보세요"}
                             onKeyDown={(e) => { if (e.key === 'Enter') handleTextSubmit(); }}
                             disabled={(!isMissionComplete && !currentLine?.isMe) || isWaitingForNPC || showModal || isEvaluatingText}
-                            style={{ 
-                                flex: 1, padding: '14px 20px', borderRadius: '24px', border: '1px solid #E5E7EB', 
-                                outline: 'none', fontSize: '15px', backgroundColor: isEvaluatingText ? '#F3F4F6' : '#FFFFFF'
+                            style={{
+                                flex: 1, padding: '14px 20px', borderRadius: '24px', border: '1px solid #E5E7EB',
+                                outline: 'none', fontSize: '16px', backgroundColor: isEvaluatingText ? '#F3F4F6' : '#FFFFFF'
                             }}
                         />
                         <button

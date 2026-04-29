@@ -263,7 +263,7 @@ export default function PostMain() {
                                 <div style={{ textAlign: 'center' }}>
                                     <div style={{ fontSize: '32px', marginBottom: '12px' }}>☕️</div>
                                     <h2 style={{ fontSize: '20px', fontWeight: '800', color: '#111827', margin: '0 0 8px 0', lineHeight: '1.4' }}>
-                                        파리 카페에서 이 한 마디, <br/> 말할 수 있어요? 
+                                        파리 카페에서 이 한 마디, <br/> 같이 말해볼까요? 
                                     </h2>
                                     <p style={{ color: '#6B7280', fontSize: '14px', margin: 0, lineHeight: '1.5' }}>
                                         1분이면 충분해요. 실제 상황으로 바로 체험해보세요!
